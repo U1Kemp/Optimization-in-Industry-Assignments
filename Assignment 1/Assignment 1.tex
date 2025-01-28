@@ -1,6 +1,6 @@
 \documentclass[a4paper, 12pt]{article}
 \usepackage{amsmath, amssymb, geometry}
-\geometry{margin=1in}
+\geometry{margin=2cm}
 \title{Optimization in Industry Assignment 1 \\ Mathematical Formulation for Round Robin Match Scheduling}
 \author{Utpalraj Kemprai \\ MDS202352}
 \date{\today}
@@ -15,35 +15,42 @@
 
 \section*{Parameters}
 \begin{itemize}
-    \item $I_{i,j}$: Binary parameter, 1 if the match between team i and j is interesting, 0 otherwise
+    \item $I_{i,j}$ $(i \neq j)$: Binary parameter, 1 if the match between team $i$ and $j$ is interesting, 0 otherwise
     \item $W_{d}$: Binary parameter, 1 if $d$ is a weekend, 0 otherwise.
-    \item $D_{i,j}$: Distance between home stadiums of teams i and j.
-    \item $SC_{i}$: Capacity of home stadium of team .
+    \item $\text{Dist}_{i,j}$: Distance between home stadiums of teams $i$ and $j$.
     \item $E_{d,i}$: Binary parameter, 1 if there is a big event in the city of home stadium of team $i$ on day $d$, 0 otherwise.
-    \item $Z_i$: Zone of home stadium of team $i$.
     \item $\text{MinGap}, \text{MaxGap}$: Minimum and maximum gap between two consecutive matches for a team.
-    \item $\text{N}_{i,j,d}$: Binary variable if there is a night match between team i and j at home stadium of i in day d, 0 otherwise
+    \item $\text{MaxConsecHome}$, $\text{MaxConsecAway}$: Integer parameter, maximum number of consecutive home matches and away matches.
+    \item $\text{MaxNightMatches}$, $\text{MinNightMatches}$: Integer parameter, maximum and minimum number of night matches to be played by each team.
 \end{itemize}
 
 \section*{Decision Variables}
 \begin{itemize}
     \item $x_{i,j,d}$ $(i \neq j)$: Binary variable, 1 if match (day or night) is scheduled on day $d$ at home stadium of $i$ between team $i$ amd $j$, 0 otherwise.
+    \item $N_{i,j,d}$ $(i \neq j)$: Binary variable 1 if there is a night match between team $i$ and $j$ at home stadium of $i$ in day d, 0 otherwise.
+    \item $\text{count}_{i,d}$ : Integer variable to count the number of matches played by team $i$ as of day $d$
+    \item $\text{count\_home}_{i,d}$ : Integer variable to count the number of home matches played by team $i$ as of day $d$
+    \item $\text{count\_away}_{i,d}$ : Integer variable to count the number of away matches played by team $i$ as of day $d$
+    \item $L_{i,j,d}$ $(i \neq j)$: Binary variable 1 if team $j$ is in home location of team $i$ on day $d$.
     
 \end{itemize}
 
 \section*{Objective Function}
 \begin{align*}
-\text{Maximize: } & \sum_{m \in M} \sum_{d \in D} \sum_{s \in S} \text{Interest}(m) \cdot x_{m,d,s} \cdot \text{Weekend}(d) \\
-& - \lambda_1 \sum_{i \in T} \sum_{d \in D} \sum_{s_1, s_2 \in S} \text{Distance}(s_1, s_2) \cdot z_{i,d} \cdot z_{i,d+1},
+\text{Maximize: } & \sum_{i,j \in T; i \neq j} \sum_{d \in D} I_{i,j} \cdot x_{i,j,d} \cdot W_{d} 
 \end{align*}
-where $\lambda_1$ is a weight balancing the importance of minimizing travel distances.
 
 \section*{Constraints}
 \begin{enumerate}
     \item \textbf{Each team plays all others twice (one home and one away):}
     \begin{align*}
-        \sum_{d \in D} \sum_{j \in T, j \neq i} x_{i,j,d} = |T| - 1 , \forall i \in T \\
-        \sum_{d \in D} \sum_{i \in T, j \neq i} x_{i,j,d} = |T| - 1 , \forall j \in T 
+        \sum_{d \in D} x_{i,j,d} &= 1 , \forall j \in T \quad \text{($i$ plays $j$ exactly once at home)}\\
+        \sum_{d \in D} x_{j,i,d} &= 1 , \forall j \in T \quad \text{($i$ plays $j$ exactly once away)}
+    \end{align*}
+
+    \item \textbf{Each team plays at most one match per date}
+    \begin{align*}
+        \sum_{j \in T; i \neq j} x_{i,j,d} &\leq 1, \forall i \in T \quad \text{($i$ plays atmost one match each day)}
     \end{align*}
 
     \item \textbf{Only one match in a single day/night slot:}
@@ -54,7 +61,7 @@ where $\lambda_1$ is a weight balancing the importance of minimizing travel dist
 
     \item \textbf{Night Match is not possible if there is no match on that day}
     \begin{align*}
-        N_{i,j,d} \leq x_{i,j,d}
+        N_{i,j,d} \leq x_{i,j,d} \quad \forall i,j \in T, d \in D \text{ and } i \neq j
     \end{align*}
 
     \item \textbf{No overlapping of interesting matches:}
@@ -63,20 +70,30 @@ where $\lambda_1$ is a weight balancing the importance of minimizing travel dist
         \sum_{i,j \in T, i \neq j} x_{i,j,d} I_{i,j} (1 - N_{i,j,d}) &\leq 1 \quad \forall d \in D
     \end{align*}
 
-    \item \textbf{Match gaps for teams:}
-    % \begin{align*}
-    %     \text{MinGap} &\leq d_2 - d_1 \leq \text{MaxGap} \quad \forall d_1, d_2 \in D, \forall i \in T.
-    % \end{align*}
+    \item \textbf{Count of Home and Away matches}
+    \begin{align*}
+        \text{count\_home}_{i,d} &= \sum_{d' \leq d} \sum_{j \in T; j \neq i} x_{i,j,d'} \\
+        \text{count\_away}_{i,d} &= \sum_{d' \leq d} \sum_{j \in T; j \neq i} x_{j,i,d'} \\
+        \text{count}_{i,d} &= \text{count\_home}_{i,d} + \text{count\_away}_{i,d}
+    \end{align*}
 
-    \item \textbf{Minimize consecutive away matches:}
-    % \begin{align*}
-    %     z_{i,d} + z_{i,d+1} &\leq 1 \quad \forall d \in D, \forall i \in T.
-    % \end{align*}
+    \item \textbf{Location of the team:}
+    \begin{align*}
+        L_{i,j,d} &= x_{i,j,d} \quad \forall i,j \in T; i \neq j \text{and} d \in D.
+    \end{align*}
+
+    \item \textbf{Bounds on gaps between consecutive matches:}
+    \begin{align*}
+        \text{count}_{i,d'} - \text{count}_{i,d} &= 0 \quad \forall i \in T \text{ and } \forall d, d' \in D \text{ such that $d' \geq d$ and $d' - d \leq \text{MinGap}$} \\
+        \text{count}_{i,d'} - \text{count}_{i,d} &\geq 0 \quad \forall i \in T \text{ and } \forall d, d' \in D \text{ such that $d' \geq d$ and $d' - d \geq \text{MinGap}$} \\
+        \text{count}_{i,d+\text{MaxGap}} - \text{count}_{i,d} &\geq 1 \quad \forall i \in T \text{ and } \forall d \in D \setminus \{d \text{ : } d \geq \text{end\_date} - \text{MaxGap} \} 
+    \end{align*}
 
     \item \textbf{Home/away match balance:}
-    % \begin{align*}
-    %     w_{i,d} + z_{i,d} &\leq 1 \quad \forall d \in D, \forall i \in T.
-    % \end{align*}
+    \begin{align*}
+        \text{count\_home}_{i,d} - \text{count\_away}_{i,d} &\leq \text{MaxConsecHome} \\
+        \text{count\_away}_{i,d} - \text{count\_home}_{i,d} &\leq \text{MaxConsecAway}
+    \end{align*}
 
     \item \textbf{Avoid matches on restricted days:}
     \begin{align*}
@@ -88,31 +105,24 @@ where $\lambda_1$ is a weight balancing the importance of minimizing travel dist
         x_{i,j,d} + x_{i,j,d+1} &\leq 1 \quad \forall d \in D \setminus \{ \text{end\_date} \}
     \end{align*}
 
-    \item \textbf{Stadium capacity for smaller matches:}
-    % \begin{align*}
-    %     x_{m,d,s} \cdot \text{Interest}(m) &\leq \text{StadiumCapacity}(s) \quad \forall m \in M, \forall s \in S.
-    % \end{align*}
-
-    % \item \textbf{Zone fairness:}
-    % \begin{align*}
-    %     \sum_{d \in D} \sum_{s \in S: \text{Zone}(s) = z} x_{m,d,s} &\text{ is balanced across zones.}
-    % \end{align*}
-
     \item \textbf{Day and night match balance:}
     \begin{align*}
-        \sum_{d \in D: \text{DayMatch}(d)} y_{i,d} &\approx \sum_{d \in D: \text{NightMatch}(d)} y_{i,d} \quad \forall i \in T.
+        \sum_{d \in D} \sum_{j \in T : j \neq i} N_{i,j,d} &\leq \text{MaxNightMatches} \\
+        \sum_{d \in D} \sum_{j \in T : j \neq i} N_{i,j,d} &\geq \text{MinNightMatches}
     \end{align*}
 \end{enumerate}
 
 \section*{Assumptions}
 \begin{itemize}
-    \item All matches can be rescheduled to the next day if rain occurs.
     \item Interesting matches are known in advanced and depends on which two teams are playing only.
     \item Stadiums are uniformly distributed across zones.
     \item Travel distances between stadiums are known and constant.
     \item Each team has only one home stadium.
     \item MinGap and MaxGap values are set based on league regulations.
-    \item Day and night matches do not overlap with each ohter for any day.
+    \item MaxConsecHome and MaxConsecAway are set basedon league regulations.
+    \item Day and night slots for matches of a day do not overlap with each other.
+    \item MaxNightMatches and MinNightMatches are set in advanced based on league regulations.
+    \item The days from the start and end date of the round robin are coded as integers i.e. $D = \{1,2,3, \cdots \}$
     \item $\forall d \in D, d+1, \text{ is the immediate next day}$ 
     \item $\text{end\_date}$ is the last date in $D$
 \end{itemize}
