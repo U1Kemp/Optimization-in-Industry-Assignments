@@ -22,23 +22,26 @@
     \item $\text{MinGap}, \text{MaxGap}$: Minimum and maximum gap between two consecutive matches for a team.
     \item $\text{MaxConsecHome}$, $\text{MaxConsecAway}$: Integer parameter, maximum number of consecutive home matches and away matches.
     \item $\text{MaxNightMatches}$, $\text{MinNightMatches}$: Integer parameter, maximum and minimum number of night matches to be played by each team.
-    \item $L_{i,n}$: nth location visited by team $i$
+    \item M is the Big - M constant for our formulation.
 \end{itemize}
 
 \section*{Decision Variables}
 \begin{itemize}
     \item $x_{i,j,d}$ $(i \neq j)$: Binary variable, 1 if match (day or night) is scheduled on day $d$ at home stadium of $i$ between team $i$ amd $j$, 0 otherwise.
-    \item $N_{i,j,d}$ $(i \neq j)$: Binary variable 1 if there is a night match between team $i$ and $j$ at home stadium of $i$ in day d, 0 otherwise.
+    \item $N_{i,j,d}$ $(i \neq j)$: Binary variable, 1 if there is a night match between team $i$ and $j$ at home stadium of $i$ in day d, 0 otherwise.
     \item $\text{count}_{i,d}$ : Integer variable to count the number of matches played by team $i$ as of day $d$
     \item $\text{count\_home}_{i,d}$ : Integer variable to count the number of home matches played by team $i$ as of day $d$
     \item $\text{count\_away}_{i,d}$ : Integer variable to count the number of away matches played by team $i$ as of day $d$
-    % \item $L_{i,j,d}$ $(i \neq j)$: Binary variable 1 if team $j$ is in home location of team $i$ on day $d$.
+    \item $L_{i,j,n}$ $(i \neq j)$: Binary variable, 1 if team $j$ played their nth match in the home stadium of team $i$.
     
 \end{itemize}
 
 \section*{Objective Function}
 \begin{align*}
-\text{Maximize: } & \sum_{i,j \in T; i \neq j} \sum_{d \in D} I_{i,j} \cdot x_{i,j,d} \cdot W_{d} - \alpha (\text{count}_{i,d+l} - \text{count}_{i,d})x_{j,i,d+l} x_{k,i,d}\text{Dist}_{i,k}
+&\textbf{Maximize: }\\ 
+&\alpha \sum_{i,j \in T; i \neq j} \sum_{d \in D} I_{i,j} \cdot x_{i,j,d} \cdot W_{d} \\ 
+&- \beta \sum_{2 \leq n \leq |T| - 1} (\sum_{k \in T} \sum_{i,j \in T; i \neq j; i,j \neq k}  \text{dist}_{i,j}L_{i,k,n-1}L_{j,k,n} + 
+\sum_{j \in T}\sum_{i \in T;i \neq j} \text{dist}_{i,j}L_{i,j,n-1}L_{j,j,n} \\ + & \sum_{j \in T}\sum_{i \in T; i \neq j} \text{dist}_{i,j}L_{j,j,n-1}L_{i,j,n}) \\ &+ \text{Other terms for fair share of distances and match gaps}
 \end{align*}
 \section*{Constraints}
 \begin{enumerate}
@@ -76,9 +79,9 @@
 
     \item \textbf{Count of Home and Away matches}
     \begin{align*}
-        \text{count\_home}_{i,d} &= \sum_{d' \leq d} \sum_{j \in T; j \neq i} x_{i,j,d'} \\
-        \text{count\_away}_{i,d} &= \sum_{d' \leq d} \sum_{j \in T; j \neq i} x_{j,i,d'} \\
-        \text{count}_{i,d} &= \text{count\_home}_{i,d} + \text{count\_away}_{i,d}
+        \text{count\_home}_{i,d} &= \sum_{d' \leq d} \sum_{j \in T; j \neq i} x_{i,j,d'} \quad \forall i \in T , \forall d \in D \\
+        \text{count\_away}_{i,d} &= \sum_{d' \leq d} \sum_{j \in T; j \neq i} x_{j,i,d'} \quad \forall u \in T, \forall d \in D \\
+        \text{count}_{i,d} &= \text{count\_home}_{i,d} + \text{count\_away}_{i,d} \quad \forall i \in T, \forall d \in D
     \end{align*}
 
     % \item \textbf{Location of the team:}
@@ -95,8 +98,8 @@
 
     \item \textbf{Home/away match balance:}
     \begin{align*}
-        \text{count\_home}_{i,d} - \text{count\_away}_{i,d} &\leq \text{MaxConsecHome} \\
-        \text{count\_away}_{i,d} - \text{count\_home}_{i,d} &\leq \text{MaxConsecAway}
+        \text{count\_home}_{i,d} - \text{count\_away}_{i,d} &\leq \text{MaxConsecHome} \quad \forall i \in T , \forall d \in D \\
+        \text{count\_away}_{i,d} - \text{count\_home}_{i,d} &\leq \text{MaxConsecAway} \quad \forall i \in T , \forall d \in D
     \end{align*}
 
     \item \textbf{Avoid matches on restricted days:}
@@ -106,14 +109,23 @@
 
     \item \textbf{Match relocation day for incase of rain:}
     \begin{align*}
-        x_{i,j,d} + x_{i,j,d+1} &\leq 1 \quad \forall d \in D \setminus \{ \text{end\_date} \}
+        x_{i,j,d} + x_{i,j,d+1} &\leq 1 \quad \forall d \in D \setminus \{ \text{end\_date} \}, \forall i,j \in T, i \neq j
     \end{align*}
 
     \item \textbf{Day and night match balance:}
     \begin{align*}
-        \sum_{d \in D} \sum_{j \in T : j \neq i} (N_{i,j,d} + N_{j,i,d}) &\leq \text{MaxNightMatches} \\
-        \sum_{d \in D} \sum_{j \in T : j \neq i} (N_{i,j,d} + N_{j,i,d}) &\geq \text{MinNightMatches}
+        \sum_{d \in D} \sum_{j \in T : j \neq i} (N_{i,j,d} + N_{j,i,d}) &\leq \text{MaxNightMatches} \quad \forall j \in T\\
+        \sum_{d \in D} \sum_{j \in T : j \neq i} (N_{i,j,d} + N_{j,i,d}) &\geq \text{MinNightMatches} \quad \forall j \in T
     \end{align*}
+
+    \item \textbf{Match sequence Constraints}
+    \begin{align*}
+        \sum_{d \in D} x_{i,j,d} (count_{j,d} - n + 1) &\leq 1 +  M(1 - L_{i,j,n}) \quad \forall i,j \in T, i \neq j, \forall 1 \leq n \leq |T| - 1\\
+        \sum_{d \in D} x_{i,j,d} (count_{j,d} - n + 1) &\geq 1 - M(1 - L_{i,j,n}) \quad \forall i,j \in T, i \neq j, \forall 1 \leq n \leq |T| - 1\\
+        \sum_{i \in T; i \neq j} \sum_{d \in D} x_{j,i,d} (count_{j,d} - n + 1) &\leq 1 + M(1 - L_{j,j,n}) \quad \forall j \in T,\forall 1 \leq n \leq |T| - 1\\
+        \sum_{i \in T; i \neq j} \sum_{d \in D} x_{j,i,d} (count_{j,d} - n + 1) &\geq 1 - M(1 - L_{j,j,n}) \quad \forall j \in T,\forall 1 \leq n \leq |T| - 1
+    \end{align*}
+
 \end{enumerate}
 
 \section*{Assumptions}
@@ -126,9 +138,10 @@
     \item MaxConsecHome and MaxConsecAway are set basedon league regulations.
     \item Day and night slots for matches of a day do not overlap with each other.
     \item MaxNightMatches and MinNightMatches are set in advanced based on league regulations.
-    \item The days from the start and end date of the round robin are coded as integers i.e. $D = \{1,2,3, \cdots \}$
+    \item The days from the start and end date of the round robin are coded as integers i.e. $D = \{1,2,3, \cdots \}$.
     \item $\forall d \in D, d+1, \text{ is the immediate next day}$ 
-    \item $\text{end\_date}$ is the last date in $D$
+    \item $\text{end\_date}$ is the last date in $D$.
+    \item The Big-M constant M is sufficiently large enough.
 \end{itemize}
 
 % \[    
