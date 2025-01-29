@@ -22,6 +22,7 @@
     \item $\text{MinGap}, \text{MaxGap}$: Minimum and maximum gap between two consecutive matches for a team.
     \item $\text{MaxConsecHome}$, $\text{MaxConsecAway}$: Integer parameter, maximum number of consecutive home matches and away matches.
     \item $\text{MaxNightMatches}$, $\text{MinNightMatches}$: Integer parameter, maximum and minimum number of night matches to be played by each team.
+    \item $L_{i,n}$: nth location visited by team $i$
 \end{itemize}
 
 \section*{Decision Variables}
@@ -31,15 +32,14 @@
     \item $\text{count}_{i,d}$ : Integer variable to count the number of matches played by team $i$ as of day $d$
     \item $\text{count\_home}_{i,d}$ : Integer variable to count the number of home matches played by team $i$ as of day $d$
     \item $\text{count\_away}_{i,d}$ : Integer variable to count the number of away matches played by team $i$ as of day $d$
-    \item $L_{i,j,d}$ $(i \neq j)$: Binary variable 1 if team $j$ is in home location of team $i$ on day $d$.
+    % \item $L_{i,j,d}$ $(i \neq j)$: Binary variable 1 if team $j$ is in home location of team $i$ on day $d$.
     
 \end{itemize}
 
 \section*{Objective Function}
 \begin{align*}
-\text{Maximize: } & \sum_{i,j \in T; i \neq j} \sum_{d \in D} I_{i,j} \cdot x_{i,j,d} \cdot W_{d} 
+\text{Maximize: } & \sum_{i,j \in T; i \neq j} \sum_{d \in D} I_{i,j} \cdot x_{i,j,d} \cdot W_{d} - \alpha (\text{count}_{i,d+l} - \text{count}_{i,d})x_{j,i,d+l} x_{k,i,d}\text{Dist}_{i,k}
 \end{align*}
-
 \section*{Constraints}
 \begin{enumerate}
     \item \textbf{Each team plays all others twice (one home and one away):}
@@ -54,6 +54,8 @@
     \end{align*}
 
     \item \textbf{Only one match in a single day/night slot:}
+    
+    Non Linearity to convert to Linearity
     \begin{align*}
         \sum_{i,j \in T, i \neq j} x_{i,j,d} (1-N_{i,j,d}) \leq 1, \forall d \in D \\
         \sum_{i,j \in T, i \neq j} x_{i,j,d} N_{i,j,d} \leq 1, \forall d \in D 
@@ -65,6 +67,8 @@
     \end{align*}
 
     \item \textbf{No overlapping of interesting matches:}
+    
+    Non Linearity to convert to Linearity
     \begin{align*}
         \sum_{i,j \in T, i \neq j} x_{i,j,d} I_{i,j} N_{i,j,d} &\leq 1 \quad \forall d \in D \\
         \sum_{i,j \in T, i \neq j} x_{i,j,d} I_{i,j} (1 - N_{i,j,d}) &\leq 1 \quad \forall d \in D
@@ -77,16 +81,16 @@
         \text{count}_{i,d} &= \text{count\_home}_{i,d} + \text{count\_away}_{i,d}
     \end{align*}
 
-    \item \textbf{Location of the team:}
-    \begin{align*}
-        L_{i,j,d} &= x_{i,j,d} \quad \forall i,j \in T; i \neq j \text{and} d \in D.
-    \end{align*}
+    % \item \textbf{Location of the team:}
+    % \begin{align*}
+    %     L_{i,j,d} &= x_{i,j,d} \quad \forall i,j \in T; i \neq j \text{and} d \in D.
+    % \end{align*}
 
     \item \textbf{Bounds on gaps between consecutive matches:}
     \begin{align*}
         \text{count}_{i,d'} - \text{count}_{i,d} &= 0 \quad \forall i \in T \text{ and } \forall d, d' \in D \text{ such that $d' \geq d$ and $d' - d \leq \text{MinGap}$} \\
         \text{count}_{i,d'} - \text{count}_{i,d} &\geq 0 \quad \forall i \in T \text{ and } \forall d, d' \in D \text{ such that $d' \geq d$ and $d' - d \geq \text{MinGap}$} \\
-        \text{count}_{i,d+\text{MaxGap}} - \text{count}_{i,d} &\geq 1 \quad \forall i \in T \text{ and } \forall d \in D \setminus \{d \text{ : } d \geq \text{end\_date} - \text{MaxGap} \} 
+        \text{count}_{i,d+\text{MaxGap}} - \text{count}_{i,d} &\geq 1 \quad \forall i \in T \text{ and } \forall d \in D \setminus \{d \text{ : } d > \text{end\_date} - \text{MaxGap} \} 
     \end{align*}
 
     \item \textbf{Home/away match balance:}
@@ -107,8 +111,8 @@
 
     \item \textbf{Day and night match balance:}
     \begin{align*}
-        \sum_{d \in D} \sum_{j \in T : j \neq i} N_{i,j,d} &\leq \text{MaxNightMatches} \\
-        \sum_{d \in D} \sum_{j \in T : j \neq i} N_{i,j,d} &\geq \text{MinNightMatches}
+        \sum_{d \in D} \sum_{j \in T : j \neq i} (N_{i,j,d} + N_{j,i,d}) &\leq \text{MaxNightMatches} \\
+        \sum_{d \in D} \sum_{j \in T : j \neq i} (N_{i,j,d} + N_{j,i,d}) &\geq \text{MinNightMatches}
     \end{align*}
 \end{enumerate}
 
@@ -127,4 +131,25 @@
     \item $\text{end\_date}$ is the last date in $D$
 \end{itemize}
 
+% \[    
+    % 0 <= L_{i,j,n} <= 1
+%     L_{i,j,n} = \sum_{d} x_{i,j,d}) (count_{j,d} - n + 1)
+% = 1 if j played their nth match on day d at stadium i, else 0
+% \]
+% L_{j,j,n} >= \sum_{i} x_{j,i,d} (count_{j,d} - n + 1)
+% L_{i,j,n} <= 1 and L_{i,j,n} >= 0
+% dist_{i,j}L_{i,k,n-1}L_{j,k,n} + dist_{i,j}L_{i,j,n-1}L_{j,j,n} + dist_{i,j}L_{i,i,n-1}L_{j,i,n}
+
+% Need to linearize the above formulation for distance
+% L_{i,j,n,d} = 1 if x_{i,j,d}) (count_{j,d} - n + 1) = 1 where i \neq j
+% L_{j,j,n} = 1, if \sum_{i} x_{j,i,d} (count_{j,d} - n + 1) = 1
+% 0 <= L_{i,j,n} <= 1
+
+%  Final formulation
+%  \sum_{d} x_{i,j,d}) (count_{j,d} - n + 1) <= 1 +  M(1 - L_{i,j,n})
+%  \sum_{d} x_{i,j,d}) (count_{j,d} - n + 1) >= 1 - M(1 - L_{i,j,n})
+
+% L_{j,j,n}
+% \sum_{i} \sum_{d} x_{j,i,d} (count_{j,d} - n + 1) <= 1 + M(1 - L_{j,j,n})
+% \sum_{i} \sum_{d} x_{j,i,d} (count_{j,d} - n + 1) >= 1 - M(1 - L_{j,j,n})
 \end{document}
