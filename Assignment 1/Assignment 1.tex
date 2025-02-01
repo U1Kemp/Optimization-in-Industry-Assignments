@@ -35,7 +35,7 @@
     \item $\text{count\_away}_{i,d}$ : Integer variable to count the number of away matches played by team $i$ as of day $d$
     \item $L_{i,j,n}$: Binary variable, 1 if team $j$ played their nth match of the round robin in the home stadium of team $i$.
     \item $\text{Travel}_{i,j,k,n} (n \geq 2)$: Binary variable, 1 if team $k$ travel from home stadium of team $i$ to home stadium of team $j$ to play their nth match, i.e. $\text{Travel}_{i,j,k,n} = L_{i,k,n-1}\cdot L_{j,k,n}$.
-    \item $\text{Match\_diff}_{i,j,d}$: Continuous variable, which takes the value $|\text{count}_{i,d} - \text{count}_{j,d}|$ 
+    \item $\text{Match\_diff}_{i,j,d} (i \neq j)$: Continuous variable, which takes the value $|\text{count}_{i,d} - \text{count}_{j,d}|$ 
     \item $\text{Max\_match\_difference}_{d},\text{Min\_match\_difference}_{d}$: Continuous variable, Max and Min difference in the number of matches played by two teams as of day d.
     \item $\text{Home\_away\_diff}_{i,d}$: Continuous variable, which takes the value $|\text{count\_away}_{i,d} - \text{count\_home}_{i,d}|$ 
     \item $\text{Max\_home\_away\_diff}_{d},\text{Min\_home\_away\_diff}_{d}$: Continuous variable, Max and Min differences between the number of home and away matches played by a team as of day d. 
