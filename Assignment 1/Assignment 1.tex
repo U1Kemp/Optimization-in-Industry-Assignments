@@ -20,7 +20,8 @@
     \item $\text{Dist}_{i,j}$: Distance between home stadiums of teams $i$ and $j$.
     \item $E_{d,i}$: Binary parameter, 1 if there is a big event in the city of home stadium of team $i$ on day $d$, 0 otherwise.
     \item $\text{MinGap}, \text{MaxGap}$: Minimum and maximum gap between two consecutive matches for a team.
-    \item $\text{MaxConsecHome}$, $\text{MaxConsecAway}$: Integer parameter, maximum number of consecutive home matches and away matches.
+    \item $\text{MaxConsecHome},\text{MaxConsecAway}$: Integer parameter, maximum number of consecutive home and away matches allowed for teams.
+    \item $\text{MaxDiff}$: Integer parameter, maximum difference allowed between the number of home matches and away matches played by a team.
     \item $\text{MaxNightMatches}$, $\text{MinNightMatches}$: Integer parameter, maximum and minimum number of night matches to be played by each team.
     \item MaxSlot: Integer parameter, maximum number of matches allowed to be played simultaneouly in a single time slot (day/night).
     \item M is the Big - M constant for our formulation.
@@ -43,8 +44,8 @@
     \item max\_night\_played, min\_night\_played: Integer variable, max and min number of night matches played by a team.
     \item $s_{i,j,d}$: Binary variable, 1 if $\text{count}_{j,d} \geq \text{count}_{i,d}$, else 0.
     \item $t_{i,d}$: Binary variable, 1 if $\text{count\_home}_{i,d} \geq \text{count\_away}_{i,d}$, else 0.
-    \item $\text{p\_away}_{i,d}$: Binary variable, 1 if team $i$ has played atleast one away match by day $d$, else 0.
-    \item $\text{p\_home}_{i,d}$: Binary variable, 1 if team $i$ has played atleast one home match by day $d$, else 0.
+    \item $\text{p\_away}_{i,d,d'}$: Binary variable, 1 if team $i$ has played atleast one away match in $\{d+1,d+2,\cdots,d'\}$, else 0.
+    \item $\text{p\_home}_{i,d,d'}$: Binary variable, 1 if team $i$ has played atleast one home match in $\{d+1,d+2,\cdots,d'\}$, else 0.
     \item $\text{XN}_{i,j,d} (i \neq j)$: Binary variable, 1 if $x_{i,j,d} \cdot N_{i,j,d} = 1$, else 0.
     \item $\text{XC1}_{i,j,d} (i \neq j)$: Integer variable, equal to $x_{i,j,d} \cdot \text{count}_{j,d}$
     \item $\text{XC2}_{j,i,d} (i \neq j)$: Integer variable, equal to $x_{j,i,d} \cdot \text{count}_{j,d}$
@@ -143,22 +144,28 @@ where $\alpha_1, \alpha_2, \alpha_3, \alpha_4, \alpha_5, \alpha_6$ are coefficie
         \text{count}_{i,d+\text{MaxGap}} - \text{count}_{i,d} &\geq 1 \quad \forall i \in T \text{ and } \forall d \in D \setminus \{d \text{ : } d > \text{end\_date} - \text{MaxGap} \} 
     \end{align*}
 
-    \item \textbf{Bound on number of consecutive home and away matches played:}
+    \item \textbf{Bound on difference of number of home and away matches played by teams:}
     \begin{align*}
-        \text{count\_away}_{i,d} &\leq \text{p\_away}_{i,d} \cdot M \quad \forall i \in T, \forall d \in D\\
-        \text{count\_away}_{i,d} &\geq \text{p\_away}_{i,d} \quad \forall i \in T, \forall d \in D\\
-        \text{count\_home}_{i,d} &\leq \text{p\_home}_{i,d} \cdot M \quad \forall i \in T, \forall d \in D\\
-        \text{count\_home}_{i,d} &\geq \text{p\_home}_{i,d} \quad \forall i \in T, \forall d \in D\\
-        \text{count\_home}_{i,d} - \text{count\_away}_{i,d} &\leq \text{MaxConsecHome} - \text{p\_away}_{i,d} \quad \forall i \in T , \forall d \in D \\
-        \text{count\_away}_{i,d} - \text{count\_home}_{i,d} &\leq \text{MaxConsecAway} - \text{p\_home}_{i,d} \quad \forall i \in T , \forall d \in D
+        \text{count\_home}_{i,d} - \text{count\_away}_{i,d} &\leq \text{MaxDiff} \quad \forall i \in T , \forall d \in D \\
+        \text{count\_away}_{i,d} - \text{count\_home}_{i,d} &\leq \text{MaxDiff} \quad \forall i \in T , \forall d \in D
     \end{align*}
-    For the above constraints,
+
+    \item \textbf{Bound on the number of consecutive home and away matches:}
+    \begin{align*}
+        \sum_{j \in T;j \neq i} \sum_{\mathcal{D} = d+1}^{d'} x_{j,i,\mathcal{D}} &\leq \text{p\_away}_{i,d,d'} \cdot M \quad \forall i \in T ; \forall d,d' \in D; d < d'\\
+        \sum_{j \in T;j \neq i} \sum_{\mathcal{D} = d+1}^{d'} x_{j,i,\mathcal{D}} &\geq \text{p\_away}_{i,d,d'} \quad \forall i \in T ; \forall d,d' \in D; d < d'\\
+        \sum_{j \in T;j \neq i} \sum_{\mathcal{D} = d+1}^{d'} x_{i,j,\mathcal{D}} &\leq \text{p\_home}_{i,d,d'} \cdot M \quad \forall i \in T ; \forall d,d' \in D; d < d'\\
+        \sum_{j \in T;j \neq i} \sum_{\mathcal{D} = d+1}^{d'} x_{i,j,\mathcal{D}} &\geq \text{p\_home}_{i,d,d'} \quad \forall i \in T ; \forall d,d' \in D; d < d' \\
+        \text{count\_home}_{i,d'} - \text{count\_home}_{i,d} &\leq \text{MaxConsecHome} + \text{p\_away}_{i,d,d'} \cdot M \quad \forall i \in T ; \forall d,d' \in D; d < d' \\
+        \text{count\_away}_{i,d'} - \text{count\_away}_{i,d} &\leq \text{MaxConsecAway} + \text{p\_home}_{i,d,d'} \cdot M \quad \forall i \in T ; \forall d,d' \in D; d < d'
+    \end{align*}
+    For the above Constraints,
     \begin{itemize}
-        \item The first two constraints ensure that $\text{count\_away}_{i,d} = 0$, if $\text{p\_away}_{i,d} = 0$ and $\text{count\_away}_{i,d} \geq 1$, if $\text{p\_away}_{i,d} = 1$
-        \item The next two constraints ensure that $\text{count\_home}_{i,d} = 0$, if $\text{p\_home}_{i,d} = 0$ and $\text{count\_home}_{i,d} \geq 1$, if $\text{p\_home}_{i,d} = 1$
-        \item The last two constraints ensures that we don't have more than MaxConsecAway consecutive away matches and not more than MaxConsecHome consecutive home matches for any team.
-        \item The last two constraints also bound the difference between the number of home and away matches for any given day of the round robin, so that the home and away matches are fairly distributed across time for all teams.
+        \item The first two constraints ensure that $\text{p\_away}_{i,d,d'}=1$ if team $i$ has played atleast one away match in $\{d+1,d+2,\cdots, d'\}$, else 0.
+        \item The next two constraints ensure that $\text{p\_home}_{i,d,d'}=1$ if team $i$ has played atleast one home match in $\{d+1,d+2,\cdots, d'\}$, else 0.
+        \item The last two constraints put a bound on the number of consecutive home and away matches for each team.
     \end{itemize}
+
 
     \item \textbf{Home and away matches played by a team should be distributed in time:}
     \begin{align*}
@@ -232,6 +239,7 @@ where $\alpha_1, \alpha_2, \alpha_3, \alpha_4, \alpha_5, \alpha_6$ are coefficie
     \item Each team has only one home stadium.
     \item MinGap and MaxGap values are set based on league regulations.
     \item MaxConsecHome and MaxConsecAway are set based on league regulations.
+    \item MaxDiff is set in advanced based on league regulations.
     \item Day and night slots for matches of a day do not overlap with each other.
     \item MaxNightMatches and MinNightMatches are set in advanced based on league regulations.
     \item The days from the start and end date of the round robin are coded as positive integers i.e. $D = \{1,2,3, \cdots \}$.

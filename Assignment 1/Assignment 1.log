@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.12.6)  2 FEB 2025 10:44
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.12.6)  2 FEB 2025 14:16
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -184,22 +184,27 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
 {C:/Users/utpal/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
-Overfull \hbox (14.41583pt too wide) in paragraph at lines 40--41
+Overfull \hbox (14.41583pt too wide) in paragraph at lines 41--42
 []$[][]$\OT1/cmr/m/n/12 : Con-tin-u-ous vari-able, which takes the value $\OMS/cmsy/m/n/12 j[][] ^^@ [][]j$ 
  []
 
 [2]
-Overfull \hbox (15.58461pt too wide) detected at line 96
+Overfull \hbox (15.58461pt too wide) detected at line 97
 []
  []
 
 [3]
-Overfull \hbox (30.6511pt too wide) detected at line 120
+Overfull \hbox (30.6511pt too wide) detected at line 121
 []
  []
 
 
-Overfull \hbox (43.97638pt too wide) detected at line 144
+Overfull \hbox (43.97638pt too wide) detected at line 145
+[]
+ []
+
+
+Overfull \hbox (39.05531pt too wide) detected at line 161
 []
  []
 
@@ -212,13 +217,13 @@ L3 programming layer <2024-01-04>
 Here is how much of TeX's memory you used:
  2319 strings out of 474486
  34643 string characters out of 5743755
- 1948542 words of memory out of 5000000
+ 1949542 words of memory out of 5000000
  24618 multiletter control sequences out of 15000+600000
  568128 words of font info for 75 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 57i,14n,65p,398b,263s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,14n,65p,398b,260s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\utpal\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on "Assignment 1.pdf" (7 pages, 146681 bytes).
+Output written on "Assignment 1.pdf" (7 pages, 147970 bytes).
 PDF statistics:
  81 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
