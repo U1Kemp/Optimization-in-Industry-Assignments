@@ -44,8 +44,8 @@
     \item max\_night\_played, min\_night\_played: Integer variable, max and min number of night matches played by a team.
     \item $s_{i,j,d}$: Binary variable, 1 if $\text{count}_{j,d} \geq \text{count}_{i,d}$, else 0.
     \item $t_{i,d}$: Binary variable, 1 if $\text{count\_home}_{i,d} \geq \text{count\_away}_{i,d}$, else 0.
-    \item $\text{p\_away}_{i,d,d'}$: Binary variable, 1 if team $i$ has played atleast one away match in $\{d+1,d+2,\cdots,d'\}$, else 0.
-    \item $\text{p\_home}_{i,d,d'}$: Binary variable, 1 if team $i$ has played atleast one home match in $\{d+1,d+2,\cdots,d'\}$, else 0.
+    \item $\text{p\_away}_{i,d,d'} (d' > d)$: Binary variable, 1 if team $i$ has played atleast one away match in $\{d+1,d+2,\cdots,d'\}$, else 0.
+    \item $\text{p\_home}_{i,d,d'} (d' > d)$: Binary variable, 1 if team $i$ has played atleast one home match in $\{d+1,d+2,\cdots,d'\}$, else 0.
     \item $\text{XN}_{i,j,d} (i \neq j)$: Binary variable, 1 if $x_{i,j,d} \cdot N_{i,j,d} = 1$, else 0.
     \item $\text{XC1}_{i,j,d} (i \neq j)$: Integer variable, equal to $x_{i,j,d} \cdot \text{count}_{j,d}$
     \item $\text{XC2}_{j,i,d} (i \neq j)$: Integer variable, equal to $x_{j,i,d} \cdot \text{count}_{j,d}$
@@ -230,6 +230,10 @@ where $\alpha_1, \alpha_2, \alpha_3, \alpha_4, \alpha_5, \alpha_6$ are coefficie
 
 \end{enumerate}
 
+\section*{Output}
+The $\{(x_{i,j,d},N_{i,j,d}): i,j \in T, i \neq j, d \in D\}$ obtained by solving the above formulation gives when and where should a match between 2 teams be scheduled.
+
+
 \section*{Assumptions}
 \begin{itemize}
     \item Interesting matches are known in advanced and depends on which two teams are playing only.
@@ -237,6 +241,7 @@ where $\alpha_1, \alpha_2, \alpha_3, \alpha_4, \alpha_5, \alpha_6$ are coefficie
     \item Travel distances between stadiums are known and constant.
     \item Events in a stadium/city are all known in advanced, i.e. $\text{E}_{d,i}$ are all known in advanced for all days and all stadiums.
     \item Each team has only one home stadium.
+    \item MaxSlot is set in advanced based on league regulations.
     \item MinGap and MaxGap values are set based on league regulations.
     \item MaxConsecHome and MaxConsecAway are set based on league regulations.
     \item MaxDiff is set in advanced based on league regulations.
