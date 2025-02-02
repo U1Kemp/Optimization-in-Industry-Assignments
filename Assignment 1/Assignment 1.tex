@@ -43,6 +43,8 @@
     \item max\_night\_played, min\_night\_played: Integer variable, max and min number of night matches played by a team.
     \item $s_{i,j,d}$: Binary variable, 1 if $\text{count}_{j,d} \geq \text{count}_{i,d}$, else 0.
     \item $t_{i,d}$: Binary variable, 1 if $\text{count\_home}_{i,d} \geq \text{count\_away}_{i,d}$, else 0.
+    \item $\text{p\_away}_{i,d}$: Binary variable, 1 if team $i$ has played atleast one away match by day $d$, else 0.
+    \item $\text{p\_home}_{i,d}$: Binary variable, 1 if team $i$ has played atleast one home match by day $d$, else 0.
     \item $\text{XN}_{i,j,d} (i \neq j)$: Binary variable, 1 if $x_{i,j,d} \cdot N_{i,j,d} = 1$, else 0.
     \item $\text{XC1}_{i,j,d} (i \neq j)$: Integer variable, equal to $x_{i,j,d} \cdot \text{count}_{j,d}$
     \item $\text{XC2}_{j,i,d} (i \neq j)$: Integer variable, equal to $x_{j,i,d} \cdot \text{count}_{j,d}$
@@ -134,18 +136,29 @@ where $\alpha_1, \alpha_2, \alpha_3, \alpha_4, \alpha_5, \alpha_6$ are coefficie
     \text{Match\_diff}_{i,j,d} &\geq \text{Min\_match\_difference}_{d} \quad \forall i,j \in T, i \neq j; d \in D
     \end{align*}
 
-    \item \textbf{Bounds on gaps between consecutive matches:}
+    \item \textbf{Bounds on gaps between consecutive matches of a team:}
     \begin{align*}
-        \text{count}_{i,d'} - \text{count}_{i,d} &= 0 \quad \forall i \in T \text{ and } \forall d, d' \in D \text{ such that $d' \geq d$ and $d' - d \leq \text{MinGap}$} \\
+        \text{count}_{i,d'} - \text{count}_{i,d} &= 0 \quad \forall i \in T \text{ and } \forall d, d' \in D \text{ such that $d' \geq d$ and $d' - d \leq \text{MinGap}$} - 1 \\
         \text{count}_{i,d'} - \text{count}_{i,d} &\geq 0 \quad \forall i \in T \text{ and } \forall d, d' \in D \text{ such that $d' \geq d$ and $d' - d \geq \text{MinGap}$} \\
         \text{count}_{i,d+\text{MaxGap}} - \text{count}_{i,d} &\geq 1 \quad \forall i \in T \text{ and } \forall d \in D \setminus \{d \text{ : } d > \text{end\_date} - \text{MaxGap} \} 
     \end{align*}
 
     \item \textbf{Bound on number of consecutive home and away matches played:}
     \begin{align*}
-        \text{count\_home}_{i,d} - \text{count\_away}_{i,d} &\leq \text{MaxConsecHome} - 1 \quad \forall i \in T , \forall d \in D \\
-        \text{count\_away}_{i,d} - \text{count\_home}_{i,d} &\leq \text{MaxConsecAway} - 1 \quad \forall i \in T , \forall d \in D
+        \text{count\_away}_{i,d} &\leq \text{p\_away}_{i,d} \cdot M \quad \forall i \in T, \forall d \in D\\
+        \text{count\_away}_{i,d} &\geq \text{p\_away}_{i,d} \quad \forall i \in T, \forall d \in D\\
+        \text{count\_home}_{i,d} &\leq \text{p\_home}_{i,d} \cdot M \quad \forall i \in T, \forall d \in D\\
+        \text{count\_home}_{i,d} &\geq \text{p\_home}_{i,d} \quad \forall i \in T, \forall d \in D\\
+        \text{count\_home}_{i,d} - \text{count\_away}_{i,d} &\leq \text{MaxConsecHome} - \text{p\_away}_{i,d} \quad \forall i \in T , \forall d \in D \\
+        \text{count\_away}_{i,d} - \text{count\_home}_{i,d} &\leq \text{MaxConsecAway} - \text{p\_home}_{i,d} \quad \forall i \in T , \forall d \in D
     \end{align*}
+    For the above constraints,
+    \begin{itemize}
+        \item The first two constraints ensure that $\text{count\_away}_{i,d} = 0$, if $\text{p\_away}_{i,d} = 0$ and $\text{count\_away}_{i,d} \geq 1$, if $\text{p\_away}_{i,d} = 1$
+        \item The next two constraints ensure that $\text{count\_home}_{i,d} = 0$, if $\text{p\_home}_{i,d} = 0$ and $\text{count\_home}_{i,d} \geq 1$, if $\text{p\_home}_{i,d} = 1$
+        \item The last two constraints ensures that we don't have more than MaxConsecAway consecutive away matches and not more than MaxConsecHome consecutive home matches for any team.
+        \item The last two constraints also bound the difference between the number of home and away matches for any given day of the round robin, so that the home and away matches are fairly distributed across time for all teams.
+    \end{itemize}
 
     \item \textbf{Home and away matches played by a team should be distributed in time:}
     \begin{align*}
@@ -215,6 +228,7 @@ where $\alpha_1, \alpha_2, \alpha_3, \alpha_4, \alpha_5, \alpha_6$ are coefficie
     \item Interesting matches are known in advanced and depends on which two teams are playing only.
     \item Stadiums are uniformly distributed across zones.
     \item Travel distances between stadiums are known and constant.
+    \item Events in a stadium/city are all known in advanced, i.e. $\text{E}_{d,i}$ are all known in advanced for all days and all stadiums.
     \item Each team has only one home stadium.
     \item MinGap and MaxGap values are set based on league regulations.
     \item MaxConsecHome and MaxConsecAway are set based on league regulations.

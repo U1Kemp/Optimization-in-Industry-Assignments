@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.12.6)  1 FEB 2025 18:18
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.12.6)  2 FEB 2025 10:44
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -189,21 +189,21 @@ Overfull \hbox (14.41583pt too wide) in paragraph at lines 40--41
  []
 
 [2]
-Overfull \hbox (15.58461pt too wide) detected at line 94
-[]
- []
-
-
-Overfull \hbox (30.6511pt too wide) detected at line 118
+Overfull \hbox (15.58461pt too wide) detected at line 96
 []
  []
 
 [3]
-Overfull \hbox (23.6294pt too wide) detected at line 142
+Overfull \hbox (30.6511pt too wide) detected at line 120
 []
  []
 
-[4] [5] [6] (Assignment 1.aux)
+
+Overfull \hbox (43.97638pt too wide) detected at line 144
+[]
+ []
+
+[4] [5] [6] [7] (Assignment 1.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-04>
@@ -212,15 +212,15 @@ L3 programming layer <2024-01-04>
 Here is how much of TeX's memory you used:
  2319 strings out of 474486
  34643 string characters out of 5743755
- 1953542 words of memory out of 5000000
+ 1948542 words of memory out of 5000000
  24618 multiletter control sequences out of 15000+600000
  568128 words of font info for 75 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 57i,14n,65p,398b,260s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,14n,65p,398b,263s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\utpal\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/utpal/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on "Assignment 1.pdf" (6 pages, 144095 bytes).
+Output written on "Assignment 1.pdf" (7 pages, 146681 bytes).
 PDF statistics:
- 76 PDF objects out of 1000 (max. 8388607)
+ 81 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
