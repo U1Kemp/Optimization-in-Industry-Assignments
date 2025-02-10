@@ -3,7 +3,7 @@
 \geometry{margin=2cm}
 \title{Optimization in Industry Assignment 1 \\ Mathematical Formulation for Round Robin Match Scheduling}
 \author{Utpalraj Kemprai \\ MDS202352}
-\date{}
+\date{\today}
 \begin{document}
 \maketitle
 
@@ -190,9 +190,11 @@ where $\alpha_1, \alpha_2, \alpha_3, \alpha_4, \alpha_5, \alpha_6$ are coefficie
         x_{i,j,d} &\leq 1 - E_{d,i} \quad \forall d \in D, \forall i,j \in T, i \neq j
     \end{align*}
 
-    \item \textbf{Match relocation day for incase of rain/other disruptions:}
+    \item \textbf{Match reallocation day for incase of rain/other disruptions:}
     \begin{align*}
-         \sum_{k \in T; k \neq i} (x_{i,k,d+1} + x_{k,i,d+1}) + \sum_{k \in T; k \neq j} (x_{j,k,d+1} + x_{k,j,d+1}) \leq 1 - x_{i,j,d} \quad \forall d \in D \setminus \{ \text{end\_date} \}, \\
+         \sum_{k \in T; k \neq i} (x_{i,k,d+1} + x_{k,i,d+1})  &\leq 1 - x_{i,j,d} \quad \forall d \in D \setminus \{ \text{end\_date} \},
+         \forall i,j \in T, i \neq j\\
+         \sum_{k \in T; k \neq j} (x_{j,k,d+1} + x_{k,j,d+1}) &\leq 1 - x_{i,j,d} \quad \forall d \in D \setminus \{ \text{end\_date} \},
          \forall i,j \in T, i \neq j
     \end{align*}
 
