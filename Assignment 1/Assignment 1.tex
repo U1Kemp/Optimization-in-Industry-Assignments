@@ -73,19 +73,6 @@ where $\alpha_1, \alpha_2, \alpha_3, \alpha_4, \alpha_5, \alpha_6$ are coefficie
     \item \(\alpha_6 = 2\) → Balances night matches, ensuring no team gets too many late-night games.
 \end{itemize}
 
-
-% The first individual objective function gives the number of interesting matches scheduled on weekends.
-
-% The second gives the total distance travel by all the teams.
-
-% The third gives sum of the difference of the maximum and minimum differences in the number of matches played by two teams for all days in the round robin.
-
-% The fourth gives the difference between maximum and minimum distance travelled by a team.
-
-% The fifth gives the sum of the difference of the maximum and minimum differences in the number of home and away matches played by a team for all days of the round robin.
-
-% The sixth gives the difference between the maximum and minimum number of night matches played by a team
-
 \section*{Constraints}
 \begin{enumerate}
     \item \textbf{Each team plays all others twice (one home and one away):}
@@ -205,7 +192,8 @@ where $\alpha_1, \alpha_2, \alpha_3, \alpha_4, \alpha_5, \alpha_6$ are coefficie
 
     \item \textbf{Match relocation day for incase of rain/other disruptions:}
     \begin{align*}
-        x_{i,j,d} + x_{i,j,d+1} &\leq 1 \quad \forall d \in D \setminus \{ \text{end\_date} \}, \forall i,j \in T, i \neq j
+         \sum_{k \in T; k \neq i} (x_{i,k,d+1} + x_{k,i,d+1}) + \sum_{k \in T; k \neq j} (x_{j,k,d+1} + x_{k,j,d+1}) \leq 1 - x_{i,j,d} \quad \forall d \in D \setminus \{ \text{end\_date} \}, \\
+         \forall i,j \in T, i \neq j
     \end{align*}
 
     \item \textbf{Bound on number of Night matches:}
