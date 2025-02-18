@@ -1,0 +1,156 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,amsfonts}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{setspace}
+\geometry{margin=1in}
+\onehalfspacing
+
+\begin{document}
+
+\title{Mathematical Model for Optimal ATM Refill Problem}
+\author{}
+\date{}
+\maketitle
+
+\section{Sets}
+\begin{itemize}[leftmargin=1.5cm]
+    \item[\textbf{I.}] \(\mathcal{I}\): Set of ATMs, indexed by \(i\) (i.e., \(i=1,\dots,|\mathcal{I}|\)).
+    \item[\textbf{V.}] \(\mathcal{V}\): Set of vehicles, indexed by \(v\) (i.e., \(v=1,\dots,|\mathcal{V}|\)).
+    \item[\textbf{D.}] \(\mathcal{D}\): Set of days in the planning horizon, indexed by \(d\) (e.g., \(d=1,\dots,7\)).
+    \item[\textbf{K.}] \(\mathcal{K}\): (Optional) Set of denominations, indexed by \(k\).
+\end{itemize}
+
+\section{Parameters}
+\begin{itemize}[leftmargin=1.5cm]
+    \item \(\displaystyle d_{i,d}\): Cash demand at ATM \(i\) on day \(d\).
+    \item \(\displaystyle I_i^0\): Initial cash inventory at ATM \(i\) (at start of day 1).
+    \item \(\displaystyle C_i\): Maximum cash capacity of ATM \(i\).
+    \item \(\displaystyle L_i\): Minimum cash level required at ATM \(i\).
+    \item \(\displaystyle Q_{\min}\): Minimum cash deposit per refill (e.g., 50K).
+    \item \(\displaystyle Q_{\text{unit}}\): Cash deposit unit (e.g., 10K), so that any nonzero refill is a multiple of \(Q_{\text{unit}}\).
+    \item \(\displaystyle \text{cap}_v\): Maximum cash carrying capacity of vehicle \(v\) (security limited).
+    \item \(\displaystyle \text{cost}_v\): Cost associated with using vehicle \(v\).
+    \item \(\displaystyle \text{maxVisit}_{v,d}\): Maximum number of ATMs vehicle \(v\) can service on day \(d\) (e.g., 20 on weekdays, 30 on weekends).
+    \item \(\displaystyle S\): Security gap in days. If vehicle \(v\) visits ATM \(i\) on day \(d\), it cannot visit the same ATM again in the next \(S-1\) days.
+    \item \(\displaystyle r_{i,d,k}\): (Optional) Denomination requirement for ATM \(i\) on day \(d\) for denomination \(k\) (soft constraint).
+    \item \(\displaystyle w_1,\, w_2,\, w_3\): Weights for the objective function corresponding to vehicles used, ATM inventory holding cost, and number of visits, respectively.
+    \item \(\displaystyle M\): A sufficiently large constant (Big-M).
+\end{itemize}
+
+\section{Decision Variables}
+\begin{itemize}[leftmargin=1.5cm]
+    \item \(\displaystyle x_{i,v,d} \in \{0,1\}\): Equals 1 if vehicle \(v\) refills ATM \(i\) on day \(d\); 0 otherwise.
+    \item \(\displaystyle y_{i,v,d} \ge 0\): Amount of cash delivered to ATM \(i\) by vehicle \(v\) on day \(d\).  
+    \[
+    y_{i,v,d} = Q_{\text{unit}} \cdot q_{i,v,d}, \quad q_{i,v,d} \in \mathbb{Z}_{\geq 0}
+    \]
+    with the additional condition that if \(q_{i,v,d} > 0\) then \(q_{i,v,d} \ge \frac{Q_{\min}}{Q_{\text{unit}}}\).
+    \item \(\displaystyle z_{v,d} \in \{0,1\}\): Equals 1 if vehicle \(v\) is used on day \(d\); 0 otherwise.
+    \item \(\displaystyle I_{i,d}\): Cash inventory at ATM \(i\) at the end of day \(d\).
+    \item \(\displaystyle y_{i,v,d,k} \ge 0\) (Optional): Cash delivered in denomination \(k\) for ATM \(i\) on day \(d\).
+\end{itemize}
+
+\section{Objective Function}
+We consider a weighted-sum objective that minimizes:
+\begin{equation*}
+    \min \quad Z = w_1 \sum_{d \in \mathcal{D}} \sum_{v \in \mathcal{V}} z_{v,d} \;+\; w_2 \sum_{d \in \mathcal{D}} \sum_{i \in \mathcal{I}} I_{i,d} \;+\; w_3 \sum_{d \in \mathcal{D}} \sum_{v \in \mathcal{V}} \sum_{i \in \mathcal{I}} x_{i,v,d}.
+\end{equation*}
+
+\noindent \textbf{Explanation:}
+\begin{itemize}[leftmargin=1cm]
+    \item The first term minimizes the (weighted) number of vehicles used.
+    \item The second term minimizes the total ATM cash inventory holding cost.
+    \item The third term minimizes the total number of ATM visits.
+\end{itemize}
+
+\section{Constraints}
+\subsection*{A. ATM Inventory Balance and Capacity}
+\begin{enumerate}[label=\textbf{(A\arabic*)}]
+    \item \textbf{Inventory Update:} For each \(i \in \mathcal{I}\) and \(d \in \mathcal{D}\),
+    \[
+    I_{i,d} =
+    \begin{cases}
+    I_i^0 + \displaystyle\sum_{v \in \mathcal{V}} y_{i,v,1} - d_{i,1}, & d=1,\\[1mm]
+    I_{i,d-1} + \displaystyle\sum_{v \in \mathcal{V}} y_{i,v,d} - d_{i,d}, & d \ge 2.
+    \end{cases}
+    \]
+    \item \textbf{Inventory Limits:} For all \(i \in \mathcal{I}\) and \(d \in \mathcal{D}\),
+    \[
+    L_i \le I_{i,d} \le C_i.
+    \]
+\end{enumerate}
+
+\subsection*{B. Service (Assignment) Constraints}
+\begin{enumerate}[label=\textbf{(B\arabic*)}]
+    \item \textbf{One Refill per ATM per Day:} For every \(i \in \mathcal{I}\) and \(d \in \mathcal{D}\),
+    \[
+    \sum_{v \in \mathcal{V}} x_{i,v,d} \le 1.
+    \]
+    \item \textbf{Linking \(x\) and \(y\):} For all \(i \in \mathcal{I}\), \(v \in \mathcal{V}\), and \(d \in \mathcal{D}\),
+    \[
+    y_{i,v,d} \ge Q_{\min} \, x_{i,v,d} \quad \text{and} \quad y_{i,v,d} \le M\, x_{i,v,d}.
+    \]
+\end{enumerate}
+
+\subsection*{C. Vehicle Capacity and Workload}
+\begin{enumerate}[label=\textbf{(C\arabic*)}]
+    \item \textbf{Vehicle Loading Limit:} For each \(v \in \mathcal{V}\) and \(d \in \mathcal{D}\),
+    \[
+    \sum_{i \in \mathcal{I}} y_{i,v,d} \le \text{cap}_v \, z_{v,d}.
+    \]
+    \item \textbf{Maximum Visits per Vehicle per Day:} For all \(v \in \mathcal{V}\) and \(d \in \mathcal{D}\),
+    \[
+    \sum_{i \in \mathcal{I}} x_{i,v,d} \le \text{maxVisit}_{v,d} \, z_{v,d}.
+    \]
+\end{enumerate}
+
+\subsection*{D. Security and Scheduling Constraints}
+\begin{enumerate}[label=\textbf{(D\arabic*)}]
+    \item \textbf{Spread Out ATM Visits:} For all \(v \in \mathcal{V}\), for each \(i \in \mathcal{I}\) and for each day \(d \in \mathcal{D}\) such that \(d+S-1 \le \max(\mathcal{D})\),
+    \[
+    x_{i,v,d} + \sum_{d' = d+1}^{\min(d+S-1,\max(\mathcal{D}))} x_{i,v,d'} \le 1.
+    \]
+\end{enumerate}
+
+\subsection*{E. (Optional) Denomination Constraints (Soft)}
+\begin{enumerate}[label=\textbf{(E\arabic*)}]
+    \item For each \(i \in \mathcal{I}\), \(d \in \mathcal{D}\), and \(k \in \mathcal{K}\), if modeling denomination details,
+    \[
+    \sum_{v \in \mathcal{V}} y_{i,v,d,k} \ge r_{i,d,k} - \text{penalty}_{i,d,k}.
+    \]
+    A penalty term may be added to the objective to account for unmet denomination preferences.
+\end{enumerate}
+
+\subsection*{F. Deposit Size Discreteness}
+\begin{enumerate}[label=\textbf{(F\arabic*)}]
+    \item To ensure that if cash is delivered, it is either zero or at least \(Q_{\min}\) (in multiples of \(Q_{\text{unit}}\)):
+    \[
+    y_{i,v,d} = Q_{\text{unit}} \cdot q_{i,v,d}, \quad q_{i,v,d} \in \mathbb{Z}_{\geq 0}, \quad q_{i,v,d} \ge \frac{Q_{\min}}{Q_{\text{unit}}}\, x_{i,v,d}.
+    \]
+\end{enumerate}
+
+\section{Assumptions}
+\begin{itemize}[leftmargin=1.5cm]
+    \item The planning horizon is one week (\(7\) days).
+    \item Daily demands \(d_{i,d}\) and initial inventories \(I_i^0\) are known.
+    \item ATMs must always have cash between the levels \(L_i\) and \(C_i\).
+    \item Vehicles are loaded only at the beginning of the day (no mid-day refilling).
+    \item Vehicles' cash capacities are limited by security considerations, which may be lower than their physical capacities.
+    \item In case of high demand, additional (rented) vehicles may be used, represented by higher cost parameters.
+    \item A refill at an ATM is done by at most one vehicle per day.
+    \item For security, if a vehicle visits an ATM on day \(d\), it cannot visit the same ATM again for the next \(S-1\) days.
+    \item Refills must be in multiples of \(Q_{\text{unit}}\) (e.g., 10K), with any nonzero refill being at least \(Q_{\min}\) (e.g., 50K).
+    \item The denomination requirement is a soft constraint; unmet denomination preferences are penalized but do not prevent meeting the overall cash demand.
+\end{itemize}
+
+\section{Output}
+The solution to this Mixed-Integer Programming (MIP) model will determine:
+\begin{itemize}[leftmargin=1.5cm]
+    \item Which vehicles are used on each day (via \(z_{v,d}\)).
+    \item Which ATMs are refilled by which vehicle on each day (via \(x_{i,v,d}\)).
+    \item The amount of cash delivered to each ATM on each day (via \(y_{i,v,d}\)).
+    \item The evolution of ATM cash inventories \(I_{i,d}\) over the planning horizon.
+\end{itemize}
+
+\end{document}
