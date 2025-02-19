@@ -8,21 +8,22 @@
 
 \begin{document}
 
-\title{Mathematical Model for Optimal ATM Refill Problem}
-\author{}
-\date{}
+\title{Optimization in Industry Assignment 2
+\\Mathematical Model for Optimal ATM Refill Problem}
+\author{Utpalraj Kemprai}
+\date{\today}
 \maketitle
 
-\section{Sets}
+\section*{Sets}
 \begin{itemize}[leftmargin=1.5cm]
-    \item[\textbf{I.}] \(\mathcal{I}\): Set of ATMs, indexed by \(i\) (i.e., \(i=1,\dots,|\mathcal{I}|\)).
-    \item[\textbf{V.}] \(\mathcal{V}\): Set of vehicles, indexed by \(v\) (i.e., \(v=1,\dots,|\mathcal{V}|\)).
-    \item[\textbf{D.}] \(\mathcal{D}\): Set of days in the planning horizon, indexed by \(d\) (e.g., \(d=1,\dots,7\)).
-    \item[\textbf{K.}] \(\mathcal{K}\): (Optional) Set of denominations, indexed by \(k\).
+    \item[\textbf{1.}] \(\mathcal{I}\): Set of ATMs, indexed by \(i\) (i.e., \(i=1,\dots,|\mathcal{I}|\)).
+    \item[\textbf{2.}] \(\mathcal{V}\): Set of vehicles, indexed by \(v\) (i.e., \(v=1,\dots,|\mathcal{V}|\)).
+    \item[\textbf{3.}] \(\mathcal{D}\): Set of days in the planning horizon, indexed by \(d\) (e.g., \(d=1,\dots,7\)).
+    \item[\textbf{4.}] \(\mathcal{K}\): Set of denominations, indexed by \(k\).
 \end{itemize}
 
-\section{Parameters}
-\begin{itemize}[leftmargin=1.5cm]
+\section*{Parameters}
+\begin{enumerate}[leftmargin=1.5cm]
     \item \(\displaystyle d_{i,d}\): Cash demand at ATM \(i\) on day \(d\).
     \item \(\displaystyle I_i^0\): Initial cash inventory at ATM \(i\) (at start of day 1).
     \item \(\displaystyle C_i\): Maximum cash capacity of ATM \(i\).
@@ -33,14 +34,15 @@
     \item \(\displaystyle \text{cost}_v\): Cost associated with using vehicle \(v\).
     \item \(\displaystyle \text{maxVisit}_{v,d}\): Maximum number of ATMs vehicle \(v\) can service on day \(d\) (e.g., 20 on weekdays, 30 on weekends).
     \item \(\displaystyle S\): Security gap in days. If vehicle \(v\) visits ATM \(i\) on day \(d\), it cannot visit the same ATM again in the next \(S-1\) days.
-    \item \(\displaystyle r_{i,d,k}\): (Optional) Denomination requirement for ATM \(i\) on day \(d\) for denomination \(k\) (soft constraint).
-    \item \(\displaystyle w_1,\, w_2,\, w_3\): Weights for the objective function corresponding to vehicles used, ATM inventory holding cost, and number of visits, respectively.
+    \item \(\displaystyle r_{i,d,k}\): Denomination requirement for ATM \(i\) on day \(d\) for denomination \(k\) (soft constraint).
+    \item \(\displaystyle w_1,\, w_2,\, w_3, w_4\): Weights for the objective function corresponding to vehicles used, ATM inventory holding cost, and number of visits, respectively.
     \item \(\displaystyle M\): A sufficiently large constant (Big-M).
-\end{itemize}
+\end{enumerate}
 
-\section{Decision Variables}
-\begin{itemize}[leftmargin=1.5cm]
+\section*{Decision Variables}
+\begin{enumerate}[leftmargin=1.25cm]
     \item \(\displaystyle x_{i,v,d} \in \{0,1\}\): Equals 1 if vehicle \(v\) refills ATM \(i\) on day \(d\); 0 otherwise.
+    \item \(\displaystyle q_{i,v,d} \in \mathbb{Z}_{\geq 0}\): Number of cash deposit units \(Q_{\text{unit}}\), delivered to ATM \(i\) by vehicle \(v\) on day \(d\).
     \item \(\displaystyle y_{i,v,d} \ge 0\): Amount of cash delivered to ATM \(i\) by vehicle \(v\) on day \(d\).  
     \[
     y_{i,v,d} = Q_{\text{unit}} \cdot q_{i,v,d}, \quad q_{i,v,d} \in \mathbb{Z}_{\geq 0}
@@ -48,13 +50,14 @@
     with the additional condition that if \(q_{i,v,d} > 0\) then \(q_{i,v,d} \ge \frac{Q_{\min}}{Q_{\text{unit}}}\).
     \item \(\displaystyle z_{v,d} \in \{0,1\}\): Equals 1 if vehicle \(v\) is used on day \(d\); 0 otherwise.
     \item \(\displaystyle I_{i,d}\): Cash inventory at ATM \(i\) at the end of day \(d\).
-    \item \(\displaystyle y_{i,v,d,k} \ge 0\) (Optional): Cash delivered in denomination \(k\) for ATM \(i\) on day \(d\).
-\end{itemize}
+    \item \(\displaystyle y_{i,v,d,k} \ge 0\): Cash delivered in denomination \(k\) for ATM \(i\) on day \(d\).
+    \item \(\displaystyle \text{penalty}_{i,d,k} \geq 0\): Unmet demand for cash delivered in denomination \(k\) for ATM \(i\) on day \(d\).
+\end{enumerate}
 
-\section{Objective Function}
-We consider a weighted-sum objective that minimizes:
+\section*{Objective Function}
+We consider a weighted-sum objective function:
 \begin{equation*}
-    \min \quad Z = w_1 \sum_{d \in \mathcal{D}} \sum_{v \in \mathcal{V}} z_{v,d} \;+\; w_2 \sum_{d \in \mathcal{D}} \sum_{i \in \mathcal{I}} I_{i,d} \;+\; w_3 \sum_{d \in \mathcal{D}} \sum_{v \in \mathcal{V}} \sum_{i \in \mathcal{I}} x_{i,v,d}.
+    \text{Minimize:} \quad w_1 \sum_{d \in \mathcal{D}} \sum_{v \in \mathcal{V}} z_{v,d} \;+\; w_2 \sum_{d \in \mathcal{D}} \sum_{i \in \mathcal{I}} I_{i,d} \;+\; w_3 \sum_{d \in \mathcal{D}} \sum_{v \in \mathcal{V}} \sum_{i \in \mathcal{I}} x_{i,v,d} + w_4 \sum_{i \in \mathcal{I}}\sum_{d \in \mathcal{D}}\sum_{k \in \mathcal{K}} \text{penalty}_{i,d,k}
 \end{equation*}
 
 \noindent \textbf{Explanation:}
@@ -62,9 +65,10 @@ We consider a weighted-sum objective that minimizes:
     \item The first term minimizes the (weighted) number of vehicles used.
     \item The second term minimizes the total ATM cash inventory holding cost.
     \item The third term minimizes the total number of ATM visits.
+    \item The fourth term minimizes the unmet denomination preferences at each of the ATM.
 \end{itemize}
 
-\section{Constraints}
+\section*{Constraints}
 \subsection*{A. ATM Inventory Balance and Capacity}
 \begin{enumerate}[label=\textbf{(A\arabic*)}]
     \item \textbf{Inventory Update:} For each \(i \in \mathcal{I}\) and \(d \in \mathcal{D}\),
@@ -77,7 +81,10 @@ We consider a weighted-sum objective that minimizes:
     \]
     \item \textbf{Inventory Limits:} For all \(i \in \mathcal{I}\) and \(d \in \mathcal{D}\),
     \[
-    L_i \le I_{i,d} \le C_i.
+        L_i \le I_{i,d}
+    \]
+    \[
+        I_{i,d} \le C_i
     \]
 \end{enumerate}
 
@@ -85,11 +92,14 @@ We consider a weighted-sum objective that minimizes:
 \begin{enumerate}[label=\textbf{(B\arabic*)}]
     \item \textbf{One Refill per ATM per Day:} For every \(i \in \mathcal{I}\) and \(d \in \mathcal{D}\),
     \[
-    \sum_{v \in \mathcal{V}} x_{i,v,d} \le 1.
+    \sum_{v \in \mathcal{V}} x_{i,v,d} \le 1
     \]
     \item \textbf{Linking \(x\) and \(y\):} For all \(i \in \mathcal{I}\), \(v \in \mathcal{V}\), and \(d \in \mathcal{D}\),
     \[
-    y_{i,v,d} \ge Q_{\min} \, x_{i,v,d} \quad \text{and} \quad y_{i,v,d} \le M\, x_{i,v,d}.
+        y_{i,v,d} \ge Q_{\min} \, x_{i,v,d}
+    \]
+    \[
+        y_{i,v,d} \le M\cdot x_{i,v,d}
     \]
 \end{enumerate}
 
@@ -97,11 +107,11 @@ We consider a weighted-sum objective that minimizes:
 \begin{enumerate}[label=\textbf{(C\arabic*)}]
     \item \textbf{Vehicle Loading Limit:} For each \(v \in \mathcal{V}\) and \(d \in \mathcal{D}\),
     \[
-    \sum_{i \in \mathcal{I}} y_{i,v,d} \le \text{cap}_v \, z_{v,d}.
+    \sum_{i \in \mathcal{I}} y_{i,v,d} \le \text{cap}_v \cdot z_{v,d}
     \]
     \item \textbf{Maximum Visits per Vehicle per Day:} For all \(v \in \mathcal{V}\) and \(d \in \mathcal{D}\),
     \[
-    \sum_{i \in \mathcal{I}} x_{i,v,d} \le \text{maxVisit}_{v,d} \, z_{v,d}.
+    \sum_{i \in \mathcal{I}} x_{i,v,d} \le \text{maxVisit}_{v,d} \cdot z_{v,d}
     \]
 \end{enumerate}
 
@@ -113,24 +123,59 @@ We consider a weighted-sum objective that minimizes:
     \]
 \end{enumerate}
 
-\subsection*{E. (Optional) Denomination Constraints (Soft)}
+\subsection*{E. Workload Balance Across Vehicles}
 \begin{enumerate}[label=\textbf{(E\arabic*)}]
+    \item \textbf{Number of ATMs visited:} For each \(v \in \mathcal{V}\) and \(d \in \mathcal{D}\), define the total number of visits:
+    \[
+    W_{v,d} = \sum_{i \in \mathcal{I}} x_{i,v,d}.
+    \]
+    Introduce auxiliary variables \(W_d^{\max}\) and \(W_d^{\min}\) for each day \(d \in \mathcal{D}\) and enforce:
+    \[
+    W_{v,d} \le W_d^{\max} \quad \forall v \in \mathcal{V}, \quad 
+    W_{v,d} \ge W_d^{\min} \quad \forall v \in \mathcal{V},
+    \]
+    \[
+    W_d^{\max} - W_d^{\min} \le \Delta_x \quad \forall d \in \mathcal{D},
+    \]
+    where \(\Delta_x\) is a parameter specifying the maximum allowed difference in the number of ATMs visited by any two vehicles on day \(d\).
+    
+    \item \textbf{Cash Deposited in ATMS:} For each \(v \in \mathcal{V}\) and \(d \in \mathcal{D}\), define the total cash deposited:
+    \[
+    C_{v,d} = \sum_{i \in \mathcal{I}} y_{i,v,d}.
+    \]
+    Introduce auxiliary variables \(C_d^{\max}\) and \(C_d^{\min}\) for each day \(d \in \mathcal{D}\) and impose:
+    \[
+    C_{v,d} \le C_d^{\max} \quad \forall v \in \mathcal{V}, \quad 
+    C_{v,d} \ge C_d^{\min} \quad \forall v \in \mathcal{V},
+    \]
+    \[
+    C_d^{\max} - C_d^{\min} \le \Delta_y \quad \forall d \in \mathcal{D},
+    \]
+    where \(\Delta_y\) is a parameter specifying the maximum allowed difference in cash deposited by any two vehicles on day \(d\).
+
+    
+\end{enumerate}
+
+\subsection*{F. Denomination Constraints (Soft)}
+\begin{enumerate}[label=\textbf{(F\arabic*)}]
     \item For each \(i \in \mathcal{I}\), \(d \in \mathcal{D}\), and \(k \in \mathcal{K}\), if modeling denomination details,
     \[
-    \sum_{v \in \mathcal{V}} y_{i,v,d,k} \ge r_{i,d,k} - \text{penalty}_{i,d,k}.
+    \sum_{v \in \mathcal{V}} y_{i,v,d,k} \ge r_{i,d,k} - \text{penalty}_{i,d,k}
     \]
-    A penalty term may be added to the objective to account for unmet denomination preferences.
 \end{enumerate}
 
-\subsection*{F. Deposit Size Discreteness}
-\begin{enumerate}[label=\textbf{(F\arabic*)}]
+\subsection*{G. Deposit Size Discreteness}
+\begin{enumerate}[label=\textbf{(G\arabic*)}]
     \item To ensure that if cash is delivered, it is either zero or at least \(Q_{\min}\) (in multiples of \(Q_{\text{unit}}\)):
     \[
-    y_{i,v,d} = Q_{\text{unit}} \cdot q_{i,v,d}, \quad q_{i,v,d} \in \mathbb{Z}_{\geq 0}, \quad q_{i,v,d} \ge \frac{Q_{\min}}{Q_{\text{unit}}}\, x_{i,v,d}.
+        y_{i,v,d} = Q_{\text{unit}} \cdot q_{i,v,d}
+    \]
+    \[
+        q_{i,v,d} \ge \frac{Q_{\min}}{Q_{\text{unit}}}\cdot x_{i,v,d}
     \]
 \end{enumerate}
 
-\section{Assumptions}
+\section*{Assumptions}
 \begin{itemize}[leftmargin=1.5cm]
     \item The planning horizon is one week (\(7\) days).
     \item Daily demands \(d_{i,d}\) and initial inventories \(I_i^0\) are known.
@@ -144,7 +189,7 @@ We consider a weighted-sum objective that minimizes:
     \item The denomination requirement is a soft constraint; unmet denomination preferences are penalized but do not prevent meeting the overall cash demand.
 \end{itemize}
 
-\section{Output}
+\section*{Output}
 The solution to this Mixed-Integer Programming (MIP) model will determine:
 \begin{itemize}[leftmargin=1.5cm]
     \item Which vehicles are used on each day (via \(z_{v,d}\)).
