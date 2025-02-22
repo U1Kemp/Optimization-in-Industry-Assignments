@@ -167,7 +167,7 @@ We consider a weighted-sum objective function:\\
 
 \subsection*{E. Workload Balance Across Vehicles}
 \begin{enumerate}[label=\textbf{(E\arabic*)}]
-    \item \textbf{Number of ATMs visited:} For each \(v,v' \in \mathcal{V}\),
+    \item \textbf{Number of ATMs visited by vehicles:} For each \(v,v' \in \mathcal{V}\),
     % \[
     % W_{v,d} = \sum_{i \in \mathcal{I}} x_{i,v,d}.
     % \]
@@ -182,9 +182,9 @@ We consider a weighted-sum objective function:\\
     % where \(\Delta_x\) is a parameter specifying the maximum allowed difference in the number of ATMs visited by any two vehicles on day \(d\).
     
     \[
-    \sum_{i \in \mathcal{I}} \sum_{d \in \mathcal{D}} (x_{i,v,d} - x_{i,v',d}) \le \Delta_x
+    \sum_{i \in \mathcal{I}} \sum_{d \in \mathcal{D}} \left(x_{i,v,d} - x_{i,v',d}\right) \le \Delta_x
     \]
-    \item \textbf{Cash Deposited in ATMS:} For each \(v,v' \in \mathcal{V}\),
+    \item \textbf{Total Cash Deposited in ATMs by vehicles:} For each \(v,v' \in \mathcal{V}\),
     % \[
     % C_{v,d} = \sum_{i \in \mathcal{I}} y_{i,v,d}.
     % \]
@@ -199,7 +199,7 @@ We consider a weighted-sum objective function:\\
     % where \(\Delta_y\) is a parameter specifying the maximum allowed difference in cash deposited by any two vehicles on day \(d\).
 
     \[
-        \sum_{i \in \mathcal{I}} \sum_{d \in \mathcal{D}} (y_{i,v,d} - y_{i,v',d}) \le \Delta_y
+        \sum_{i \in \mathcal{I}} \sum_{d \in \mathcal{D}} \left(\frac{y_{i,v,d}}{\text{cap}_v} - \frac{y_{i,v',d}}{\text{cap}_{v'}}\right) \le \Delta_y
     \]
     
 \end{enumerate}
@@ -207,7 +207,7 @@ We consider a weighted-sum objective function:\\
 \noindent \textbf{Explanation:}
 \begin{itemize}[leftmargin=1cm]
     \item (E1) Ensures the difference between the number of ATM visits by any two vehicles \(v\) and \(v'\) across the planning horizon does not exceed \(\Delta_x\).
-    \item (E2) Ensures the difference between the total cash deposited by any two vehicles \(v\) and \(v'\) across the planning horizon does not exceed \(\Delta_y\).
+    \item (E2) Ensures the weighted difference between the total cash deposited by any two vehicles \(v\) and \(v'\) across the planning horizon does not exceed \(\Delta_y\). Here we have taken the Weights to be the inverse of the vehicle capacity.
 \end{itemize}
 
 \subsection*{F. Denomination Constraints (Soft)}
@@ -262,7 +262,7 @@ We consider a weighted-sum objective function:\\
     \item ATMs must always have cash between the levels \(L_i\) and \(C_i\).
     \item Vehicles are loaded only at the beginning of the day (no mid-day refilling).
     \item Vehicles' cash capacities are limited by security considerations, which may be lower than their physical capacities.
-    \item In case of high demand, additional (rented) vehicles may be used, represented by higher cost parameters.
+    % \item In case of high demand, additional (rented) vehicles may be used, represented by higher cost parameters.
     \item A refill at an ATM is done by at most one vehicle per day.
     \item For security, if a vehicle visits an ATM on day \(d\), it cannot visit the same ATM again for the next \(S-1\) days.
     \item Refills must be in multiples of \(Q_{\text{unit}}\) (e.g., 10K), with any nonzero refill being at least \(Q_{\min}\) (e.g., 50K).
