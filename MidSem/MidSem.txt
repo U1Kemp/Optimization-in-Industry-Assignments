@@ -1,0 +1,47 @@
+You can write the solution in MS Word, MS Powerpoint, or any other medium of your choice.
+
+Alternatively, you can write the solution on paper and upload the scanned image.
+
+Deadline: Please submit the assignment by 8thMarch 11 PM.
+
+Note: This assignment would have 20% weightage. The marks for each question is indicated in bold.
+
+Q1) How would you formulate the constraint: x could be either 15 or 20 ? (1 mark)
+
+Q2) In a factory, A and B are processes which could be either parallel or sequential.
+
+LT of A = LT_A, LT of B = LT_B
+
+Cap of A = Cap_A, Cap of B = Cap_B
+
+If we want to need to represent A and B by a single operation (say X) what would the net Lead Time and capacity of X if
+
+A)     A and B are parallel
+
+B)     A and B are in series
+
+(4 marks)
+
+Q3)
+
+2X + 2Y <= 35 where X and Y are integers
+
+How would you make the above constraint tighter? (2 marks)
+
+Q4) Please formulate the below problem (7 marks)
+
+I need to ship the following items, with the input data as below. Each item needs to be shipped by shipDate at the latest, but can be shipped as early as availDate. Each truck has a min/max load, so if there is not enough load for 1 truck, the shipment is postponed to next day.
+
+shipDate     item  weight availDate
+
+10/20/23     1     10kg   10/20/23
+
+10/20/23     2     20kg   10/19/23
+
+10/21/23     3     30kg   10/19/23
+
+10/22/23     4     40kg   10/21/23
+
+Q5) An airlines company has X aircrafts (say X=100) and Y flights every day (say Y = 700 on weekends and 600 on weekdays). Y includes cases where there are multiple flights in a day for same origin-destination pair. Consider that the aircraft could have 2 different aircraft types: seating capacity 90 and 180.
+
+If you are in charge of deciding the airlines schedule, what do you think will be the constraints and objectives of this problem? (No need to formulate) (6 marks)

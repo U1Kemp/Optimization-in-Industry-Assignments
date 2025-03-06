@@ -1,0 +1,134 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,amsfonts}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{setspace}
+\geometry{margin=0.75in}
+\onehalfspacing
+
+\begin{document}
+
+\title{Optimization in Industry \\Mid Semester Exam}
+\author{Utpalraj Kemprai\\
+MDS202352}
+\date{}
+\maketitle
+
+\section*{Question 1}
+
+We will introduce a binary variable \(I \in \{0,1\}\). And set the following linear constraint.
+\[
+    x = 15 + 5\times I
+\]
+
+This will ensure that \(x\) is either 15 or 20.
+
+\section*{Question 2}
+
+\subsection*{(A) A and B are parallel}
+\begin{itemize}
+    \item Net Lead Time = max(LT\_A, LT\_B)
+    \item Net Capacity = Cap\_A + Cap\_B
+\end{itemize}
+\subsubsection*{Assumption for the parallel case}
+Both processes A and B must be completed before operation X is considered complete.
+
+\subsection*{(B) A and B are in series}
+\begin{itemize}
+    \item Net Lead Time = LT\_A + LT\_B
+    \item Net Capacity = min(Cap\_A, Cap\_B)
+\end{itemize}
+
+% \newpage
+\section*{Question 3}
+As X and Y are integers, 2X + 2Y is an even integer and so cannot be equal to 35. Since 2X+2Y is always even, we can tighten the constraint by replacing 35 with 34 in the original constraint.
+
+So the new tighter constraint is,
+\begin{align*}
+    2X + 2Y \leq 34\\
+    \text{ or } X + Y \leq 17
+\end{align*}
+
+\section*{Question 4}
+\subsection*{Sets}
+\begin{itemize}
+    \item $I$: set of items indexed by \(i\).
+    \item $D$: set of days indexed by $d$, where d ranges from the item's availDate to its shipDate and has been coded as an integer (i.e., $d = 1,2,\cdots$). Here 1 corresponds to the earliest date in D, 2 to the day immediately after and so on. D contains all the dates from the earliest availDate (of the items) to the latest shipDate (of the items).
+    \item $T$: set of Trucks available indexed by \(t\).
+\end{itemize}
+
+\subsection*{Parameters}
+\begin{itemize}
+    \item \(w_i > 0\): weight of item \(i\).
+    \item \(\text{avail}_i\): earliest possible shipping day for item i.
+    \item \(\text{ship}_i\): latest shipping day for item i.
+    \item Truck load bounds: \(L_{\text{min},t}\) and \(L_{\text{max},t}\), minimum and maximum truck load for truck \(t\).
+\end{itemize}
+
+\subsection*{Decision Variables}
+\begin{itemize}
+    \item \(x_{i,d,t} \in \{0,1\}\): 1 if item \(i\) is shipped on day \(d\) by truck \(t\), otherwise 0.
+    \item \(y_{t,d} \in \{0,1\}\): 1 if the truck \(t\) is dispatched on day \(d\), otherwise 0.
+\end{itemize}
+
+\subsection*{Constraints}
+\begin{enumerate}
+    \item \textbf{Item Assignment:}
+    \[
+        \sum_{d=\text{avail}_i}^{\text{ship}_i}\sum_{t \in T} x_{i,d,t} = 1, \quad \forall i \in I
+    \]
+
+    \[
+        x_{i,d,t} = 0, \quad d \notin \{\text{avail}_i,\text{avail}_i + 1, \cdots, \text{ship}_i\},\forall i \in I, \forall t \in T
+    \]
+
+    \noindent\textbf{Explanation}  
+
+    The above constraints ensure that each item \(i\) will be shipped in one of the dates from \(\text{avail}_i\) to \(\text{ship}_i\).
+    
+    \item \textbf{Truck Capacity (if the truck is dispatched):}
+    \[
+        \sum_{i \in I} w_i\cdot x_{i,d,t} \leq L_{\text{max},t} \cdot y_{t,d}, \quad \forall d \in D, \forall t \in T
+    \]
+
+    \[
+        \sum_{i \in I} w_i\cdot x_{i,d,t} \geq L_{\text{min},t} \cdot y_{t,d}, \quad \forall d \in D, \forall t \in T
+    \]
+
+    \noindent\textbf{Explanation}
+    
+    The above constraints ensure that for each scheduled dispatch for a truck \(t\), the items assigned exceed the minimum load but do not exceed its maximum load. It also ensures that no items are assigned to a truck if the truck is not dispatched.
+
+\end{enumerate}
+
+\subsection*{Objective}
+Minimize the cumulative time between the date of shipment of items and their availDate:
+\[
+    \min \sum_{d \in D} \sum_{i \in I} \sum_{t \in T} (d - \text{avail}_i) \cdot x_{i,d,t}
+\]
+
+
+\section*{Question 5}
+\subsection*{Possible Constraints}
+\begin{itemize}
+    \item \textbf{Limited aircrafts:} Total aircrafts assigned \(\leq\) number of available aircrafts.
+    \item \textbf{Flight coverage:} Each scheduled flight must be assigned an aircraft.
+    \item \textbf{Meeting demand:} Matching aircraft type (90-seat or 180-seat) with flight demand.
+    \item \textbf{Maintenance and crew:} Scheduling constraint for maintenance and crew availability. e.g. time between consecutive flights, number of flights in a day etc.
+    \item \textbf{Operational Regulations:} Compliance with regulatory requirements.
+    \item \textbf{Boarding and Unboarding Constraints:} Time window for the passengers to board and unboard the flights.
+\end{itemize}
+
+\subsection*{Possible Objectives}
+\begin{itemize}
+    \item \textbf{Maximize Revenue/Profit:} By optimally matching aircraft to flight demand.
+    \item \textbf{Minimize Costs:} Including fuel, crew and maintenance costs.
+    \item \textbf{Enhance Robustness:} Mitigate delays and disruptions while maintaining the schedule.
+\end{itemize}
+% end of exam
+
+\end{document}
+
+
+
+
