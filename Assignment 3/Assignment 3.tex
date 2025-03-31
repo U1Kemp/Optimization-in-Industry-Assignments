@@ -1,0 +1,253 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{titlesec}
+\usepackage{enumitem}
+
+\geometry{margin=1in}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+
+\titleformat{\section}
+  {\normalfont\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries}{\thesubsection}{1em}{}
+
+\begin{document}
+
+\title{Optimization Assignment 3 \\
+Mathematical Model for Office Space Allocation}
+\author{Utpalraj Kemprai\\MDS202352}
+\date{}
+\maketitle
+
+\section{Assumptions}
+
+\begin{enumerate}
+\item \textbf{Flexible Seating Policy}: Employees do not have dedicated seats but can be assigned different seats on different days.
+
+\item \textbf{Social Distancing}: Floor capacities have been reduced to accommodate social distancing requirements.
+
+\item \textbf{Collaboration Requirements}: Teams have specific days when collaboration is required, and team members should be allocated together on those days.
+
+\item \textbf{Fixed vs. Floating Seats}: Some employees require fixed seats (guaranteed allocation), while others can use floating seats.
+
+\item \textbf{Cost Saving on Low Demand Days}: On days with low demand (e.g., near holidays), it's preferable to concentrate employees on fewer floors to reduce operational costs.
+
+\item \textbf{Night Shift Exclusion}: Night shift employees are excluded from the model as they can use the same spaces after day shift employees leave.
+
+\item \textbf{Minimum Allocation Threshold}: When a team is allocated to a floor on a day, at least 5 employees must be assigned (or none at all).
+
+\item \textbf{Business Hours}: All allocations are for standard business hours.
+\end{enumerate}
+
+\section{Sets}
+\begin{itemize}
+\item $T$: Set of teams, $T = \{1, 2, \ldots, |T|\}$
+\item $D$: Set of days in a week, $D = \{1, 2, \ldots, |D|\}$
+\item $F$: Set of floors, $F = \{1, 2, \ldots, |F|\}$
+\item $C$: Set of collaboration levels, $C = \{\text{High}, \text{Medium}, \text{Low}\}$
+\end{itemize}
+
+\section{Parameters}
+\begin{itemize}
+\item $C_f$: Capacity of floor $f \in F$ (adjusted for social distancing)
+\item $E_t$: Total number of employees in team $t \in T$
+\item $F_t$: Number of fixed seats required by team $t \in T$
+\item $P_{td}$: Collaboration pattern for team $t \in T$ on day $d \in D$ (1 if collaboration is required, 0 otherwise)
+\item $L_t \in C$: Collaboration level needed by team $t \in T$
+\item $\text{demand}_d$: Demand factor for day $d$ (High demand = 1, Low demand = 0)
+\item $\text{minAlloc}$: Minimum number of employees allocated per team per day per floor (= 5)
+\item $X$: Maximum loading percentage deviation
+\item $w_1, w_2, w_3, w_4$: Weights for different objectives in the objective function
+\item $\alpha$: Minimum proportion of target collaboration to be satisfied (= 0.6)
+\end{itemize}
+
+\section{Decision Variables}
+\begin{itemize}
+\item $x_{tdf}$: Number of employees from team $t \in T$ assigned to floor $f \in F$ on day $d \in D$
+\item $y_{tf}$: Binary variable, 1 if team $t \in T$ occupies floor $f \in F$, 0 otherwise
+\item $z_{td}$: Binary variable, 1 if any member of team $t \in T$ is present on day $d \in D$, 0 otherwise
+\item $w_t$: Binary variable, 1 if team $t$ occupies more than one floor, 0 otherwise
+\item $\text{floor}_{df}$: Binary variable, 1 if floor $f$ is used on day $d$, 0 otherwise
+\item $\text{minLoad}$: Minimum total loading across all days
+\item $\text{maxLoad}$: Maximum total loading across all days
+\item $a_{tdf}$: Binary variable, 1 if team $t$ has a non-zero allocation on floor $f$ on day $d$
+\end{itemize}
+
+\section{Objective Function}
+Maximize:
+\begin{equation}
+    \begin{split}
+        w_1 \cdot \sum_{t \in T} \sum_{d \in D} \sum_{f \in F} x_{tdf} - w_2 \cdot \sum_{t \in T} w_t - w_3 \cdot \sum_{d \in D} \sum_{f \in F} \text{floor}_{df} \cdot (1 - \text{demand}_d)\\ - w_4 \cdot (\text{maxLoad} - \text{minLoad})
+    \end{split}
+\end{equation}
+
+\textbf{Explanation}: This objective function balances four key business goals with adjustable weights ($w_1$ through $w_4$):
+
+\begin{enumerate}
+\item \textbf{Maximize total occupancy} ($w_1$ term): We want to get as many employees into the office as possible to maximize the use of available space.
+
+\item \textbf{Minimize teams splitting across multiple floors} ($w_2$ term): We want to keep teams together for better collaboration. Each team that must use multiple floors counts as a penalty.
+
+\item \textbf{Minimize floors used on low-demand days} ($w_3$ term): On days with low demand (like near holidays), we want to concentrate employees on fewer floors to save operational costs like electricity, cleaning, and cafeteria services.
+
+\item \textbf{Balance workload across days} ($w_4$ term): We want to avoid having some days extremely crowded and others nearly empty by minimizing the gap between the busiest and quietest days.
+\end{enumerate}
+
+\textbf{Example}: If we set $w_1 = 10, w_2 = 5, w_3 = 3, w_4 = 2$, the model will prioritize maximizing occupancy first, followed by keeping teams together, then minimizing costs on low-demand days, and finally balancing workload across the week.
+
+\section{Constraints}
+
+\subsection{Floor Capacity}
+\begin{equation}
+\sum_{t \in T} x_{tdf} \leq C_f \cdot \text{floor}_{df}, \quad \forall d \in D, f \in F
+\end{equation}
+
+\textbf{Purpose}: Ensures we don't exceed the maximum capacity of each floor.
+
+\textbf{Explanation}: For each floor on each day, the total number of employees assigned cannot exceed that floor's capacity. The capacity accounts for social distancing requirements. The constraint also connects employee assignments to the floor usage indicator.
+
+\textbf{Example}: If Floor 3 has a capacity of 50 people with social distancing, we cannot assign 52 people to that floor on Monday. If no one is assigned to Floor 3 on Monday, $floor\_used_{Monday,3} = 0$.
+
+\subsection{Fixed Seat Allocation}
+\begin{equation}
+\sum_{d \in D} \sum_{f \in F} x_{tdf} \geq F_t, \quad \forall t \in T
+\end{equation}
+
+\textbf{Purpose}: Guarantees that teams receive their required fixed seats.
+
+\textbf{Explanation}: Each team has a certain number of employees who need fixed (guaranteed) seating. This constraint ensures those requirements are met over the week.
+
+\textbf{Example}: If the Finance team requires 10 fixed seats, the model will allocate at least 10 seats to Finance team members across the week.
+
+\subsection{Collaboration Pattern}
+\begin{equation}
+\sum_{f \in F} x_{tdf} \geq \alpha \cdot P_{td} \cdot E_t, \quad \forall t \in T, d \in D
+\end{equation}
+
+\textbf{Purpose}: Respects each team's collaboration needs on specific days.
+
+\textbf{Explanation}: On days when a team needs to collaborate (indicated by $P_{td} = 1$), at least a certain percentage ($\alpha = 60\%$) of the team's employees must be allocated office space. This ensures enough team members are present for effective collaboration.
+
+\textbf{Example}: If the Marketing team (20 employees) needs to collaborate on Wednesday ($P_{Marketing,Wednesday} = 1$), at least 12 employees (60\% of 20) must be allocated space on Wednesday.
+
+\subsection{Total Employee Allocation}
+\begin{equation}
+\sum_{d \in D} \sum_{f \in F} x_{tdf} \leq E_t, \quad \forall t \in T
+\end{equation}
+
+\textbf{Purpose}: Prevents assigning more employees than a team actually has.
+
+\textbf{Explanation}: The total allocation for a team across all days and floors cannot exceed the total number of employees in that team.
+
+\textbf{Example}: If the IT team has 30 employees total, we cannot assign more than 30 IT team positions across the entire week.
+
+\subsection{Team Floor Occupancy}
+\begin{equation}
+x_{tdf} \leq E_t \cdot y_{tf}, \quad \forall t \in T, d \in D, f \in F
+\end{equation}
+
+\textbf{Purpose}: Tracks which floors are occupied by each team.
+
+\textbf{Explanation}: This constraint activates the $y_{tf}$ indicator when employees from team $t$ are assigned to floor $f$. It's used to track team dispersion across floors.
+
+\textbf{Example}: If 15 Sales team members are assigned to Floor 2 on any day of the week, then $y_{Sales,2} = 1$, indicating that the Sales team occupies Floor 2.
+
+\subsection{Team Presence on Day}
+\begin{equation}
+x_{tdf} \leq E_t \cdot z_{td}, \quad \forall t \in T, d \in D, f \in F
+\end{equation}
+
+\textbf{Purpose}: Tracks which days each team is present in the office.
+
+\textbf{Explanation}: This constraint activates the $z_{td}$ indicator when employees from team $t$ are assigned on day $d$. It helps track attendance patterns.
+
+\textbf{Example}: If any number of Engineering team members are assigned to any floor on Tuesday, then $z_{Engineering,Tuesday} = 1$.
+
+\subsection{Floor Used Indicator}
+\begin{equation}
+\sum_{t \in T} x_{tdf} \leq C_f \cdot \text{floor}_{df}, \quad \forall d \in D, f \in F
+\end{equation}
+
+\textbf{Purpose}: Tracks which floors are being used on which days for cost management.
+
+\textbf{Explanation}: This constraint activates the $\text{floor}_{df}$ indicator when any employees are assigned to floor $f$ on day $d$. It helps minimize operational costs by potentially leaving entire floors unused on low-demand days.
+
+\textbf{Example}: If Floor 4 has no employees assigned on Friday (perhaps near a holiday), then $floor\_used_{Friday,4} = 0$, and the company can save on electricity, cleaning, and cafeteria costs for that floor.
+
+\subsection{Loading Balance}
+\begin{align}
+\sum_{t \in T} \sum_{f \in F} x_{tdf} &\geq \text{minLoad}, \quad \forall d \in D\\
+\sum_{t \in T} \sum_{f \in F} x_{tdf} &\leq \text{maxLoad}, \quad \forall d \in D\\
+\text{maxLoad} &\leq (1 + X) \cdot \text{minLoad}
+\end{align}
+
+\textbf{Purpose}: Ensures balanced occupancy across different days of the week.
+
+\textbf{Explanation}: These constraints prevent extreme variations in daily office occupancy by limiting the maximum occupancy to no more than X\% higher than the minimum occupancy.
+
+\textbf{Example}: If X = 20\% and the minimum daily occupancy is 100 employees, then the maximum daily occupancy cannot exceed 120 employees. This prevents situations where the office is extremely crowded on some days and nearly empty on others.
+
+\subsection{Minimum Allocation}
+\begin{align}
+x_{tdf} &\geq \text{minAlloc} \cdot a_{tdf}, \quad \forall t \in T, d \in D, f \in F\\
+x_{tdf} &\leq E_t \cdot a_{tdf}, \quad \forall t \in T, d \in D, f \in F
+\end{align}
+
+\textbf{Purpose}: Enforces a minimum threshold for team members on a floor.
+
+\textbf{Explanation}: When a team is assigned to a floor on a given day, either no team members are assigned (allocation = 0) or at least a minimum number (e.g., 5 employees) must be assigned. This prevents inefficient tiny allocations of just 1-2 people.
+
+\textbf{Example}: If the minimum allocation is 5, we cannot assign just 3 HR team members to Floor 1 on Monday. Either 0 or at least 5 HR members must be assigned.
+
+\subsection{Multiple Floors per Team}
+\begin{equation}
+\sum_{f \in F} y_{tf} - 1 \leq |F| \cdot w_t, \quad \forall t \in T
+\end{equation}
+
+\textbf{Purpose}: Identifies teams that must be split across multiple floors.
+
+\textbf{Explanation}: This constraint activates the $w_t$ indicator when team $t$ occupies more than one floor. The objective function then penalizes this situation, encouraging the model to keep teams together.
+
+\textbf{Example}: If the Legal team occupies both Floor 2 and Floor 3, then $w_{Legal} = 1$, and a penalty is applied in the objective function.
+
+\subsection{Teams with High Collaboration Needs on Same Floor}
+For teams $t$ with $L_t = \text{High}$:
+\begin{equation}
+\sum_{f \in F} y_{tf} = 1, \quad \forall t \in T \text{ where } L_t = \text{High}
+\end{equation}
+
+\textbf{Purpose}: Keeps high-collaboration teams on a single floor.
+
+\textbf{Explanation}: Teams that require intensive collaboration are restricted to occupying exactly one floor. This ensures all team members can easily work together.
+
+\textbf{Example}: If the Product Development team has a high collaboration level, they will be constrained to occupy only one floor (like Floor 5), even if it means they can't all come in on the same days.
+
+\subsection{Fair Share Allocation}
+For floating seats (after fixed allocation):
+\begin{equation}
+\sum_{d \in D} \sum_{f \in F} (x_{tdf} - F_t \cdot z_{td}) \geq \frac{E_t - F_t}{\sum_{t' \in T} (E_{t'} - F_{t'})} \cdot \text{TotalFloatingSeats}, \quad \forall t \in T
+\end{equation}
+where $\text{TotalFloatingSeats} = \sum_{f \in F} C_f - \sum_{t \in T} F_t$
+
+\textbf{Purpose}: Ensures equitable distribution of floating seats across teams.
+
+\textbf{Explanation}: After assigning fixed seats, the remaining "floating" seats are distributed proportionally based on each team's size. This ensures fairness in how the limited office space is shared.
+
+\textbf{Example}: If after fixed seat allocation, there are 100 floating seats available and the Marketing team represents 15\% of the remaining employees needing seats, they should receive at least 15 floating seats.
+
+\subsection{Integer and Binary Constraints}
+\begin{align}
+x_{tdf} &\geq 0, \text{ integer}, \quad \forall t \in T, d \in D, f \in F\\
+y_{tf}, z_{td}, w_t, \text{floor}_{df}, a_{tdf} &\in \{0, 1\}, \quad \forall t \in T, d \in D, f \in F
+\end{align}
+
+\textbf{Purpose}: Ensures all variables have appropriate values.
+
+\textbf{Explanation}: We cannot assign fractional employees to floors, and indicators must be either 0 or 1. These constraints ensure all variables have realistic values.
+
+\textbf{Example}: We cannot assign 2.5 employees from the Finance team to Floor 3 on Thursday; it must be a whole number like 0, 1, 2, 3, etc.
+
+\end{document}
