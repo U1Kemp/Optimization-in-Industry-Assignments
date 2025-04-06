@@ -1,0 +1,176 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb}
+\usepackage{geometry}
+\geometry{letterpaper, margin=1in}
+\usepackage{enumitem}
+
+\begin{document}
+
+\title{Optimization Assignment 3 \\Model for Office Space Planning}
+\author{Utpalraj Kemprai}
+\date{}
+\maketitle
+
+\section{Sets}
+\begin{itemize}[leftmargin=2em]
+    \item[$\bullet$] \textbf{$I$}: Set of teams, indexed by $i$.
+    \item[$\bullet$] \textbf{$J$}: Set of days in the planning horizon, indexed by $j$.
+    \item[$\bullet$] \textbf{$K$}: Set of floors (or zones) in the office, indexed by $k$.
+\end{itemize}
+
+\section{Parameters}
+\begin{itemize}[leftmargin=2em]
+    \item[$\bullet$] $E_i$: Total number of employees in team $i$.
+    \item[$\bullet$] $F_k$: Capacity of floor $k$ (adjusted for social distancing).
+    \item[$\bullet$] $S_{ij}$: Number of fixed seats (assured allocation) for team $i$ on day $j$.
+    \item[$\bullet$] $T_{ij}$: Minimum threshold (from the collaboration map) for team $i$ on day $j$.
+    \item[$\bullet$] $P \in [0,100]$: Allowed percentage (e.g., 20\%) for the difference between the maximum and minimum daily occupancy.
+    \item[$\bullet$] \(M = \left(1 + \max_{i \in I} E_{i}\right)\): A sufficiently large constant (big-M) used for linearization.
+\end{itemize}
+\textbf{Explanation:} These parameters supply the required input data (team sizes, floor capacities, and collaboration targets). Note that $T_{ij}$ represents the target number of employees that should be present for effective collaboration on day $j$ for team $i$.
+
+\section{Decision Variables}
+\begin{itemize}[leftmargin=2em]
+    \item[$\bullet$] $x_{ijk}$: Number of employees from team $i$ assigned to floor $k$ on day $j$. \\
+    \quad (Assumed to be integer and $x_{ijk} \ge 0$.)
+    \item[$\bullet$] $y_{ijk}$: Binary variable equal to 1 if team $i$ occupies floor $k$ on day $j$ (i.e., if $x_{ijk} > 0$), and 0 otherwise.
+    \item[$\bullet$] $z_{ik}$: Binary variable equal to 1 if team $i$ ever occupies floor $k$ (across all days), and 0 otherwise.
+    \item[$\bullet$] $w_{jk}$: Binary variable equal to 1 if floor $k$ is occupied by any of the teams on day $j$, and 0 otherwise.
+    \item[$\bullet$] $L_j$: Total number of employees allocated on day $j$, defined as
+    \[
+    L_j = \sum_{i \in I} \sum_{k \in K} x_{ijk}.
+    \]
+    \item[$\bullet$] $L_{\min}$: A variable representing the minimum daily total occupancy over all days.
+    \item[$\bullet$] $u_{ij}$: Binary variable equal to 1 if the collaboration target for team $i$ on day $j$ is shifted to another day, and 0 if not.
+\end{itemize}
+\textbf{Explanation:} The $x$-variables represent the primary allocation. The $y$- and $z$-variables help ensure minimum allocations and control multi-floor usage. The new variable $u_{ij}$ enables the model to “relax” the collaboration target on day $j$ for team $i$ (i.e., to shift that day’s collaboration if needed). Finally, $L_j$ and $L_{\min}$ support the fairness constraints.
+
+\section{Objective Function}
+We aim to:
+\begin{enumerate}
+    \item Maximize total occupancy.
+    \item Ensure fair share allocation across days.
+    \item Minimize the number of floors used by each team.
+    \item Minimize the number of teams occupying multiple floors.
+    \item Penalize shifting of collaboration days.
+\end{enumerate}
+A weighted multi-objective function (scalarized) is given by:
+\[
+\text{Maximize} \quad Z = \alpha \sum_{j \in J} \sum_{i \in I} \sum_{k \in K} x_{ijk} - \beta \sum_{i \in I} \sum_{k \in K} z_{ik} - \gamma \sum_{j \in J} (L_j - L_{\min}) - \delta \sum_{i \in I} \sum_{j \in J} u_{ij} - \eta \sum_{j \in J} \sum_{k \in K} w_{jk},
+\]
+where \(\alpha\), \(\beta\), \(\gamma\), \(\delta\) and \(\eta\) are positive weights reflecting the importance of each objective.
+  
+\textbf{Explanation:} The first term rewards high overall occupancy; the second penalizes team dispersion across floors; the third reduces daily occupancy variability; the fourth penalizes shifting (i.e., using \( u_{ij}=1 \)) to discourage unnecessary changes; and the fifth term penalizes the number of floors used in a day.
+
+\section{Constraints}
+\subsection*{(a) Floor Capacity Constraints}
+For every floor $k$ and day $j$:
+\[
+\sum_{i \in I} x_{ijk} \leq F_k.
+\]
+\textbf{Explanation:} Ensures that no floor exceeds its available capacity.
+
+\subsection*{(b) Employee Availability}
+For every team $i$:
+\[
+ \sum_{k \in K} x_{ijk} \leq E_i.
+\]
+\textbf{Explanation:} A team cannot allocate more employees than it has, for any day \(j\).
+
+\subsection*{(c) Fixed Seat Allocation Guarantee}
+For every team $i$ and day $j$:
+\[
+\sum_{k \in K} x_{ijk} \geq S_{ij}.
+\]
+\textbf{Explanation:} Guarantees that each team receives its fixed seat allocation.
+
+\subsection*{(d) Collaboration (Target) Requirements and Feasible Count Suggestion}
+For every team $i$ and day $j$, we impose:
+\[
+\sum_{k \in K} x_{ijk} \leq T_{ij}.
+\]
+\[
+\sum_{k \in K} x_{ijk} \geq 0.6\, T_{ij} \cdot (1 - u_{ij}).
+\]
+\textbf{Explanation:}  
+\begin{itemize}[leftmargin=2em]
+    \item The first inequality ensures that the allocation does not exceed the target collaboration requirement.
+    \item The second inequality enforces that if the collaboration target is \emph{not shifted} (i.e., \(u_{ij}=0\)), the allocated count must be at least 60\% of the target. If \(u_{ij}=1\), the lower bound is relaxed (since $0.6\, T_{ij}\cdot0=0$), indicating that the requirement for that day is shifted.
+\end{itemize}
+
+\subsection*{(e) Fair Daily Load Constraint}
+Define for every day $j$:
+\[
+L_j = \sum_{i \in I} \sum_{k \in K} x_{ijk}.
+\]
+Then enforce:
+\[
+L_{j} \geq L_{\min} \quad \forall j \in J,
+\]
+\[
+L_j \leq \left(1 + \frac{P}{100}\right) \cdot L_{\min} \quad \forall j \in J.
+\]
+\textbf{Explanation:} These constraints maintain daily occupancy levels within a fixed range (e.g., within 20\% of the minimum day) to promote fairness across the week. \emph{Example:} If \(P=20\) and \(L_{\min}=1000\), then every \(L_j\) must be no more than 1200.
+
+\subsection*{(f) Minimum Allocation if a Floor is Used}
+For every team $i$, day $j$, and floor $k$, impose:
+\[
+x_{ijk} \geq 5 \cdot y_{ijk},
+\]
+\[
+x_{ijk} \leq M \cdot y_{ijk}.
+\]
+\textbf{Explanation:} These ensure that if a team is assigned to a floor on a given day (i.e., \(y_{ijk}=1\)), then at least 5 employees must be allocated on that floor. If \(y_{ijk}=0\), then no employees are allocated there.
+
+\subsection*{(g) Linking Daily Floor Use to Overall Floor Use}
+For every team $i$, day $j$, and floor $k$, include:
+\[
+y_{ijk} \leq z_{ik}.
+\]
+\textbf{Explanation:} For every team $i$ and floor $k$, the above constraint ensures that if there exists any day $j$ such that \(y_{ijk}=1\), then:
+\[
+z_{ik} = 1.
+\]
+This linkage ensures that if a team uses a floor on any day, that floor is marked as used for the team over the planning horizon. Minimizing \(\sum_{i \in I} \sum_{k \in K} z_{ik}\) in the objective helps reduce multi-floor allocations.
+
+\subsection*{(h) Linking Daily Floor Use to Number of Floors Used}
+For every team \(i\), day \(j\) and floor \(k\), include:
+\[y_{ijk} \leq w_{jk}\]
+\textbf{Explanation:} For every day \(j\) and floor \(k\), the above constraint ensures that if there exists any \(i\) such that \(y_{ijk}=1\), then:
+\[w_{jk}=1\] 
+This linkage ensures that if a team uses a floor on a day, that floor is marked as used for that day in the planning horizon. Minimizing \(\sum_{j \in J}\sum_{k \in K} w_{jk}\) in the objective helps reduce the number of floors used on a day.
+
+\subsection*{(i) Collaboration Day Pattern}
+For teams with prescribed collaboration patterns (e.g., attendance only on M/W/F), impose for each team $i$ and day $j$ not in the pattern:
+\[
+\sum_{k \in K, j \notin \text{pattern}} x_{ijk} = 0.
+\]
+\textbf{Explanation:} This constraint ensures teams are allocated seats only on their designated collaboration days.
+
+\subsection*{(j) Limiting Shifts Across Days}
+For every team $i$, restrict the total number of shifted days:
+\[
+\sum_{j \in J} u_{ij} \leq 1.
+\]
+\textbf{Explanation:} This ensures that a team can have its collaboration shifted to a different day for at most one day over the planning horizon.
+
+\section{Necessary Assumptions}
+\begin{itemize}[leftmargin=2em]
+    \item All parameters (employee counts, floor capacities, fixed seat requirements, and collaboration targets) are known in advance.
+    \item Floor capacities are pre-adjusted to reflect social distancing norms (e.g., 25\%, 50\%, 70\% occupancy).
+    \item Adjustments such as shifting collaboration days or floors are assumed to be implemented with the assistance of team leaders.
+\end{itemize}
+
+\section{Summary}
+This extended linear formulation allocates fixed and floating seats to teams over days and floors while:
+\begin{itemize}[leftmargin=2em]
+    \item Ensuring no floor exceeds its capacity.
+    \item Meeting each team’s fixed seat and collaboration requirements, with a mechanism to suggest a feasible count (at least 60\% of the target) when the target is too high.
+    \item Allowing for the possibility to shift a team’s collaboration to a different day (for at most one day per team) if capacity is an issue.
+    \item Penalizing the dispersion of a team across multiple floors.
+    \item Promoting fairness in daily occupancy.
+    \item Penalizing the number of floors used in a day.
+\end{itemize}
+The option to shift some team members to a different floor is inherently modeled by allowing allocation across floors while minimizing the number of floors used.
+
+\end{document}

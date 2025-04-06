@@ -17,7 +17,7 @@
 \begin{document}
 
 \title{Optimization Assignment 3 \\
-Mathematical Model for Office Space Allocation}
+Office Space Planning Optimization}
 \author{Utpalraj Kemprai\\MDS202352}
 \date{}
 \maketitle
@@ -66,14 +66,14 @@ Mathematical Model for Office Space Allocation}
 
 \section{Decision Variables}
 \begin{itemize}
-\item $x_{tdf}$: Number of employees from team $t \in T$ assigned to floor $f \in F$ on day $d \in D$
-\item $y_{tf}$: Binary variable, 1 if team $t \in T$ occupies floor $f \in F$, 0 otherwise
-\item $z_{td}$: Binary variable, 1 if any member of team $t \in T$ is present on day $d \in D$, 0 otherwise
-\item $w_t$: Binary variable, 1 if team $t$ occupies more than one floor, 0 otherwise
-\item $\text{floor}_{df}$: Binary variable, 1 if floor $f$ is used on day $d$, 0 otherwise
+\item $x_{tdf} \in \mathbb{Z}_{\geq 0}$: Number of employees from team $t \in T$ assigned to floor $f \in F$ on day $d \in D$
+\item $y_{tf} \in \{0,1\}$: Binary variable, 1 if team $t \in T$ occupies floor $f \in F$, 0 otherwise
+\item $z_{td} \in \{0,1\}$: Binary variable, 1 if any member of team $t \in T$ is present on day $d \in D$, 0 otherwise
+\item $w_t \in \{0,1\}$: Binary variable, 1 if team $t$ occupies more than one floor, 0 otherwise
+\item $\text{floor}_{df} \in \{0,1\}$: Binary variable, 1 if floor $f$ is used on day $d$, 0 otherwise
 \item $\text{minLoad}$: Minimum total loading across all days
 \item $\text{maxLoad}$: Maximum total loading across all days
-\item $a_{tdf}$: Binary variable, 1 if team $t$ has a non-zero allocation on floor $f$ on day $d$
+\item $a_{tdf} \in \{0,1\}$: Binary variable, 1 if team $t$ has a non-zero allocation on floor $f$ on day $d$, 0 otherwise.
 \end{itemize}
 
 \section{Objective Function}
@@ -131,7 +131,9 @@ Maximize:
 
 \textbf{Explanation}: On days when a team needs to collaborate (indicated by $P_{td} = 1$), at least a certain percentage ($\alpha = 60\%$) of the team's employees must be allocated office space. This ensures enough team members are present for effective collaboration.
 
-\textbf{Example}: If the Marketing team (20 employees) needs to collaborate on Wednesday ($P_{Marketing,Wednesday} = 1$), at least 12 employees (60\% of 20) must be allocated space on Wednesday.
+\textbf{Example}:
+If the Marketing team (20 employees) needs to collaborate on Wednesday \\
+\(P_{\text{Marketing},\text{Wednesday}} = 1\), at least 12 employees (60\% of 20) must be allocated space on Wednesday.
 
 \subsection{Total Employee Allocation}
 \begin{equation}
@@ -238,16 +240,19 @@ where $\text{TotalFloatingSeats} = \sum_{f \in F} C_f - \sum_{t \in T} F_t$
 
 \textbf{Example}: If after fixed seat allocation, there are 100 floating seats available and the Marketing team represents 15\% of the remaining employees needing seats, they should receive at least 15 floating seats.
 
-\subsection{Integer and Binary Constraints}
-\begin{align}
-x_{tdf} &\geq 0, \text{ integer}, \quad \forall t \in T, d \in D, f \in F\\
-y_{tf}, z_{td}, w_t, \text{floor}_{df}, a_{tdf} &\in \{0, 1\}, \quad \forall t \in T, d \in D, f \in F
-\end{align}
+% \subsection{Integer and Binary Constraints}
+% \begin{align}
+% x_{tdf} &\geq 0, \text{ integer}, \quad \forall t \in T, d \in D, f \in F\\
+% y_{tf}, z_{td}, w_t, \text{floor}_{df}, a_{tdf} &\in \{0, 1\}, \quad \forall t \in T, d \in D, f \in F
+% \end{align}
 
-\textbf{Purpose}: Ensures all variables have appropriate values.
+% \textbf{Purpose}: Ensures all variables have appropriate values.
 
-\textbf{Explanation}: We cannot assign fractional employees to floors, and indicators must be either 0 or 1. These constraints ensure all variables have realistic values.
+% \textbf{Explanation}: We cannot assign fractional employees to floors, and binary variables must be either 0 or 1. These constraints ensure all variables have realistic values.
 
-\textbf{Example}: We cannot assign 2.5 employees from the Finance team to Floor 3 on Thursday; it must be a whole number like 0, 1, 2, 3, etc.
+% \textbf{Example}: We cannot assign 2.5 employees from the Finance team to Floor 3 on Thursday; it must be a whole number like 0, 1, 2, 3, etc.
+
+\section{Model Output}
+
 
 \end{document}
