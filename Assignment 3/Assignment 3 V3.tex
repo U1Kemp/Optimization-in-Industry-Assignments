@@ -140,14 +140,7 @@ For every team \(i\), day \(j\) and floor \(k\), include:
 \[w_{jk}=1\] 
 This linkage ensures that if a team uses a floor on a day, that floor is marked as used for that day in the planning horizon. Minimizing \(\sum_{j \in J}\sum_{k \in K} w_{jk}\) in the objective helps reduce the number of floors used on a day.
 
-\subsection*{(i) Collaboration Day Pattern}
-For teams with prescribed collaboration patterns (e.g., attendance only on M/W/F), impose for each team $i$ and day $j$ not in the pattern:
-\[
-\sum_{k \in K, j \notin \text{pattern}} x_{ijk} = 0.
-\]
-\textbf{Explanation:} This constraint ensures teams are allocated seats only on their designated collaboration days.
-
-\subsection*{(j) Limiting Shifts Across Days}
+\subsection*{(i) Limiting Shifts Across Days}
 For every team $i$, restrict the total number of shifted days:
 \[
 \sum_{j \in J} u_{ij} \leq 1.

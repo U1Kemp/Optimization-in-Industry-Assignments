@@ -1,0 +1,142 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\geometry{letterpaper, margin=1in}
+
+\begin{document}
+
+\title{Optimization Assignment 4 \\ School Timetabling Optimization Problem (Detailed)}
+\author{Utpalraj Kemprai}
+\date{}
+\maketitle
+
+\section{Sets}
+We define the following index sets used in the model:
+\begin{itemize}
+  \item $S$: Set of all subjects, $|S|=10$, partitioned into science and non-science subsets $S_{\mathrm{sci}}$ and $S_{\mathrm{nonsci}}$.  
+  \item $C$: Set of sections (classes) in the school, $|C|=4$.  
+  \item $D$: Set of working days in the week, $|D|=5$.  
+  \item $T$: Set of discrete timeslots per day, $|T|=8$, with the first four in the morning and last four after lunch.  
+  \item $T_{\mathrm{morning}}=\{1,2,3,4\}$ and $T_{\mathrm{afternoon}}=\{5,6,7,8\}$ to distinguish pre- and post-lunch slots.
+\end{itemize}
+
+Each of these sets directly corresponds to the problem description: 4 sections, 8 slots × 5 days, 10 subjects.
+
+\section{Parameters}
+The following parameters capture the problem data and any constants used for linearization:
+\begin{itemize}
+  \item $req_s$: Total number of classes required per week for subject $s\in S$.  We set $req_s=4$ for all $s$.  
+  \item For each $s\in S_{\mathrm{sci}}$, the breakdown is $th_s=3$ theory classes and $pr_s=1$ practical class per week.  
+  \item For each $s\in S_{\mathrm{nonsci}}$, $th_s=4$ theory classes and $pr_s=0$ practical classes per week.  
+  \item $M$: A sufficiently large constant (big-$M$) to enforce logical implications, set to $M = |D|\times|T| + 1 = 5\times8 + 1 = 41$.  
+  \item $\alpha_1,\alpha_2,\alpha_3$: Non-negative weights in the objective function reflecting the relative importance of: penalizing consecutive practicals, penalizing consecutive science/non-science runs, and promoting timeslot diversity, respectively.
+\end{itemize}
+
+\section{Decision Variables}
+We introduce binary and auxiliary variables to capture scheduling decisions:
+\begin{itemize}
+  \item $x_{s,c,d,t} \in \{0,1\}$: 1 if subject $s$ is scheduled in section $c$ on day $d$ at timeslot $t$, 0 otherwise.  
+  \item $p_{s,c,d,t} \in \{0,1\}$: 1 if the practical session of science subject $s\in S_{\mathrm{sci}}$ is assigned to section $c$ on day $d$ at slot $t$, 0 otherwise.
+    \begin{itemize}
+      \item We enforce $p_{s,c,d,t} \le x_{s,c,d,t}$ so that a practical can only occur where a class is scheduled.  
+    \end{itemize}
+  \item $z^{\mathrm{pr}}_{c,d,t} \in \{0,1\}$: 1 if section $c$ has practicals in both slots $t$ and $t+1$ on day $d$, capturing forbidden consecutive practicals.  
+  \item $y^{\mathrm{sci}}_{c,d,t} \ge 0$: Integer count of science classes in section $c$ on day $d$ at slot $t$.  
+  \item $y^{\mathrm{nonsci}}_{c,d,t} \ge 0$: Integer count of non-science classes similarly.  
+  \item $z^{\mathrm{sci}}_{c,d,t} \in \{0,1\}$ and $z^{\mathrm{nonsci}}_{c,d,t} \in \{0,1\}$ for $t=1,\dots,7$: 1 if two consecutive science or non-science classes occur in slots $t$ and $t+1$ in section $c$ on day $d$.  
+  \item $n_{s,t} \ge 0$: Number of times subject $s$ is assigned to timeslot $t$ across all sections and days, to measure timeslot concentration.  
+  \item $u_s \ge 0$: Maximum number of times subject $s$ appears in any single timeslot $t$, capturing "peak" usage of that slot by $s$.  
+\end{itemize}
+
+\section{Objective Function}
+We minimize a weighted sum of three soft-penalty measures to enforce preferred scheduling patterns:
+\begin{align*}
+\min \quad & \alpha_1 \sum_{c\in C}\sum_{d\in D}\sum_{t=1}^{7} z^{\mathrm{pr}}_{c,d,t} \; + \;
+               \alpha_2 \sum_{c\in C}\sum_{d\in D}\sum_{t=1}^{7} \Bigl(z^{\mathrm{sci}}_{c,d,t} + z^{\mathrm{nonsci}}_{c,d,t}\Bigr) \\[-0.5em]
+           & \; + \; \alpha_3 \sum_{s\in S} u_s.
+\end{align*}
+
+Each term is explained below:
+\begin{enumerate}
+  \item The first term penalizes any two back-to-back practical sessions in the same section on the same day, encouraging distribution of lab classes.
+  \item The second term discourages scheduling two science or two non-science classes consecutively in any section, promoting a balanced daily mix.
+  \item The third term promotes spreading each subject across different timeslots rather than clustering in one slot.
+\end{enumerate}
+
+\section{Constraints}
+We enforce the hard requirements of the timetable as follows:
+\begin{enumerate}
+  \item \textbf{Weekly Class Count:}
+  \[
+    \sum_{d\in D}\sum_{t\in T} x_{s,c,d,t} \,=\, req_s
+    \quad\forall s\in S,\;c\in C.
+  \]
+  Ensures each subject meets its required number of weekly sessions in each section.
+
+  \item \textbf{Daily Frequency (One Class per Day):}
+  \[
+    \sum_{t\in T}\sum_{c\in C} x_{s,c,d,t} \le 1
+    \quad\forall s\in S,\;d\in D.
+  \]
+  Prevents the same subject from occurring more than once across all sections on a single day.
+
+  \item \textbf{Section Timeslot Capacity:}
+  \[
+    \sum_{s\in S} x_{s,c,d,t} \le 1
+    \quad\forall c\in C,\;d\in D,\;t\in T.
+  \]
+  At most one subject per section per timeslot.
+
+  \item \textbf{Practical Sessions:}
+  \begin{align*}
+    &\sum_{c\in C}\sum_{d\in D}\sum_{t\in T_{\mathrm{afternoon}}} p_{s,c,d,t} \,=\, pr_s
+    &&\forall s\in S_{\mathrm{sci}}, \\
+    &p_{s,c,d,t} \le x_{s,c,d,t}
+    &&\forall s\in S_{\mathrm{sci}},\;c\in C,\;d\in D,\;t\in T, \\
+    &\sum_{c\in C} p_{s,c,d,t} \le 1
+    &&\forall s\in S_{\mathrm{sci}},\;d\in D,\;t\in T, \\
+    &\sum_{s\in S_{\mathrm{sci}}}\sum_{t\in T} p_{s,c,d,t} \le 1
+    &&\forall c\in C,\;d\in D.
+  \end{align*}
+  These enforce that each science subject has exactly one practical per week (scheduled after lunch), at most one practical of the same subject per timeslot (lab capacity), and at most one practical per day in each section.
+
+  \item \textbf{Consecutive Practical Prohibition:}
+  \[
+    z^{\mathrm{pr}}_{c,d,t} \ge \sum_{s\in S_{\mathrm{sci}}} p_{s,c,d,t} + \sum_{s\in S_{\mathrm{sci}}} p_{s,c,d,t+1} - 1
+    \quad\forall c\in C,\;d\in D,\;t=1,\dots,7.
+  \]
+  If two practicals occur in successive slots, $z^{\mathrm{pr}}$ is activated and penalized in the objective.
+
+  \item \textbf{Consecutive Science/Non-Science Penalty Variables:}
+  \begin{align*}
+    y^{\mathrm{sci}}_{c,d,t} &= \sum_{s\in S_{\mathrm{sci}}} x_{s,c,d,t},
+    &\quad y^{\mathrm{nonsci}}_{c,d,t} &= \sum_{s\in S_{\mathrm{nonsci}}} x_{s,c,d,t}, \\
+    z^{\mathrm{sci}}_{c,d,t} &\ge y^{\mathrm{sci}}_{c,d,t} + y^{\mathrm{sci}}_{c,d,t+1} - 1,
+    &\quad z^{\mathrm{nonsci}}_{c,d,t} &\ge y^{\mathrm{nonsci}}_{c,d,t} + y^{\mathrm{nonsci}}_{c,d,t+1} - 1, \\
+    &\forall c\in C,\;d\in D,\;t=1,\dots,7.
+  \end{align*}
+  These constraints define the indicator of back-to-back runs of science or non-science classes.
+
+  \item \textbf{Timeslot Diversity:}
+  \begin{align*}
+    n_{s,t} &= \sum_{c\in C}\sum_{d\in D} x_{s,c,d,t},
+    &\quad u_s &\ge n_{s,t} \quad\forall s\in S,\;t\in T.
+  \end{align*}
+  We capture how often each subject appears in each timeslot and enforce $u_s$ to be at least that count. Minimizing $u_s$ spreads sessions of $s$ over different slots.
+
+\end{enumerate}
+
+\section{Necessary Assumptions}
+\begin{itemize}
+  \item Every subject requires exactly 4 sessions per week, with science subjects including exactly one practical.
+  \item Lunch break perfectly divides the day into morning and afternoon blocks.
+  \item Only one lab exists per science subject, limiting concurrent practicals.
+  \item All sections have identical timetabling requirements and must satisfy the same constraints.
+  \item Soft penalties (consecutive runs, timeslot diversity) are weighted and balanced via $\alpha_i$ chosen by the planner.
+\end{itemize}
+
+\section{Summary}
+This model assigns ten subjects to four sections over five days and eight slots, balancing hard requirements (weekly and daily counts, lab capacity) and soft preferences (avoiding consecutive practicals and subject-type runs, spreading classes across slots). The mixed-integer linear program structure is readily solvable by modern solvers, offering a flexible framework to adjust penalty weights for different policy priorities.
+
+\end{document}
+
