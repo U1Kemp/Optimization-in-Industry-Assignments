@@ -1,7 +1,7 @@
 \documentclass[11pt]{article}
 \usepackage{amsmath, amssymb}
 \usepackage{geometry}
-\geometry{letterpaper, margin=1in}
+\geometry{a4paper, margin=1in}
 
 \begin{document}
 
@@ -22,119 +22,131 @@
     \item $T_{\text{afternoon}}$ = \{5,6,7,8\}
 \end{itemize}
 
-\section*{Parameter}
-\begin{itemize}
-    \item \(M\) = 5 (= no. of sections + 1): A sufficiently large constant (big-M) used for linearization. 
-\end{itemize}
-
 \section*{Decision Variable}
 \begin{itemize}
-    \item $x_{s,c,d,t}$: Binary variable, 1 if subject \(s\) is assigned to section \(c\) on day \(d\) at timeslot \(t\), 0 otherwise
-    \item $p_{s,d,t}$: Binary variable, 1 if practical session for subject \(s\) is assigned on day \(d\) at timeslot \(t\), 0 otherwise
-    \item $y_{c,d,t}^{\text{sci}}$: Binary variable, 1 if a science subject is assigned to section \(c\) on day \(d\) at times \(t\), 0 otherwise
-    \item $y_{c,d,t}^{\text{nonsci}}$: Binary variable, 1 if a non-science subject is assigned to section \(c\) on day \(d\) at times \(t\), 0 otherwise
-    \item $z_{c,d,t}^{\text{sci}} (t \in \{1,2,\cdots,7\})$: Binary variable, 1 if consecutive science subjects were assigned to section \(c\) on day \(d\) in timeslots \(t\) and \(t+1\), otherwise 0
-    \item $z_{c,d,t}^{\text{nonsci}} (t \in \{1,2,\cdots,7\})$: Binary variable, 1 if consecutive science subjects were assigned to section \(c\) on day \(d\) in timeslots \(t\) and \(t+1\), otherwise 0
-    \item $n_{s,t}$: Number of times subject \(s\) is assigned to timeslot \(t\) in the week
-    \item $u_{s}$: Maximum number of times subject \(s\) is assigned to a single timeslot
+    \item $x_{s,c,d,t}$: Binary variable, 1 if subject \(s\) is assigned to section \(c\) on day \(d\) at timeslot \(t\), 0 otherwise.
+    \item $p_{s,c,d,t}$: Binary variable, 1 if practical session for subject \(s\) is assigned to section \(c\) on day \(d\) at timeslot \(t\), 0 otherwise.
+    \item $y_{c,d,t}^{\text{sci}}$: Binary variable, 1 if a science subject is assigned to section \(c\) on day \(d\) at times \(t\), 0 otherwise.
+    \item $y_{c,d,t}^{\text{nonsci}}$: Binary variable, 1 if a non-science subject is assigned to section \(c\) on day \(d\) at times \(t\), 0 otherwise.
+    \item $z_{c,d,t}^{\text{sci}} (t \in \{1,2,\cdots,7\})$: Binary variable, 1 if consecutive science subjects were assigned to section \(c\) on day \(d\) in timeslots \(t\) and \(t+1\), otherwise 0.
+    \item $z_{c,d,t}^{\text{nonsci}} (t \in \{1,2,\cdots,7\})$: Binary variable, 1 if consecutive science subjects were assigned to section \(c\) on day \(d\) in timeslots \(t\) and \(t+1\), otherwise 0.
+    \item $n_{s,t}$: Number of times subject \(s\) is assigned to timeslot \(t\) in the week.
+    \item $u_{s}$: Maximum number of times subject \(s\) is assigned to a single timeslot.
 \end{itemize}
-\textbf{Explanation:} The \(x\)-variables represent the assignment of subjects to timeslots across sections. The \(p\)-variables represent the allocation of practicals for the subjects. The \(y\)-variables represents if the allocated subjects are science or non-science. The \(y\) and \(z\) variables are used to penalize consecutive science and non-science allocation. And finally the \(n\) and \(u\) variables are used to promote the diversity of timeslots for the subjects.
+\textbf{Explanation:} The \(x\)-variables represent the assignment of subjects to timeslots across sections. The \(p\)-variables represent the allocation of practicals for the subjects. The \(y\)-variables represents if the allocated subjects are science or non-science. The \(z\) variables are used to penalize consecutive science and non-science allocation. And finally the \(n\) and \(u\) variables are used to promote the diversity of timeslots for the subjects.
 
 \section*{Objective Function}
-We want to :
+We want to create an optimal timetable by minimizing:
 \begin{enumerate}
-    \item Minimize the number of practicals before lunch
-    \item Minimize the number of consecutive science and non-science classes
-    \item Diversify the time slots allocated for a subject
+    \item Number of practicals scheduled before lunch.
+    \item Number of consecutive science/non-science classes.
+    \item Repetitive scheduling of subjects at the same timeslot.
 \end{enumerate}
 
-\noindent A weighted objective function is given by
+\noindent A weighted objective function is given by,
 \[
 \min \left( 
-\alpha_1 \sum_{s \in S}\sum_{d \in D}\sum_{t \in T_\text{morning}} p_{s,d,t} + \alpha_2 \sum_{s \in S}\sum_{d \in D}\sum_{t=1}^{7}\sum_{c \in C} \left(z_{c,d,t}^{\text{sci}} + z_{c,d,t}^{\text{nonsci}}\right)
+\alpha_1 \sum_{s \in S}\sum_{d \in D}\sum_{c \in C}\sum_{t \in T_\text{morning}} p_{s,c,d,t} + \alpha_2 \sum_{s \in S}\sum_{d \in D}\sum_{t=1}^{7}\sum_{c \in C} \left(z_{c,d,t}^{\text{sci}} + z_{c,d,t}^{\text{nonsci}}\right)
 + \alpha_3 \sum_{s \in S} u_s
 \right)
 \]
-where \(\alpha_1,\alpha_2 \text{ and } \alpha_3\) are positive weights reflecting the importance of each objective.
+\indent where \(\alpha_1,\alpha_2 \text{ and } \alpha_3\) are positive weights reflecting the importance of each objective.
 
-\textbf{Explanation:} The first term penalizes the allocation of practicals before lunch, the second term penalizes consecutive science and non-science classes and the third term penalizes the number of times a subject is allocated to a particular time slots across the days of the week.
+\noindent\textbf{Explanation:} The first term penalizes the allocation of practicals before lunch, the second term penalizes consecutive science and non-science classes and the third term penalizes the number of times a subject is allocated to a single time slot across the days of the week.
 
 \section*{Constraints}
 \begin{enumerate}
-    \item Each subject has 4 classes in a week:
+    \item Weekly Class Requirements
     \[
-    \sum_{d \in D} \sum_{t \in T} x_{s,c,d,t} = 4 \quad \forall s \in \mathcal{S}, \forall c \in \mathcal{C}
+    \sum_{d \in D} \sum_{t \in T} x_{s,c,d,t} = 4 \quad \forall s \in S, \forall c \in C
     \]
-    \textbf{Explanation:} Ensures each subject has 4 classes in a week.
+    \textbf{Explanation:} 
 
-    \item Every science subject to have one practical in a week:
-    \[
-    \sum_{d \in D}\sum_{t \in T} p_{s,d,t} = 1 \quad \forall s \in S_{\text{sci}}
-    \]
-    \textbf{Explanation:} Ensures each science subject has exactly one practical in a week.
+    Each subject must have exactly 4 classes per week for each section.
 
-    \item Only science subjects have practicals
+    \item Science Subjects' Practical Requirements
     \[
-    p_{s,d,t} = 0 \quad \forall s \in S_{\text{nonsci}}
+    \sum_{d \in D}\sum_{t \in T} p_{s,c,d,t} = 1 \quad \forall s \in S_{\text{sci}}
     \]
-    \textbf{Explanation:} Ensures that non-science have no practicals.
+    \textbf{Explanation:} 
+
+    Ensures each science subject has exactly one practical session per week for each section.
+
+    \item Non-Science Subjects Have No Practicals
+    \[
+    p_{s,c,d,t} = 0 \quad \forall s \in S_{\text{nonsci}}, c \in C, d \in D, t \in T
+    \]
+    \textbf{Explanation:} 
+
+    Ensures that non-science have no practicals.
     
-    \item At most one class per subject per day:
+    \item At most one class per subject per day for each section:
     \[
     \sum_{t \in T} x_{s,c,d,t} \leq 1 \quad \forall s \in S, \forall c \in C, \forall d \in D
     \]
-    \textbf{Explanation:} Each subject has atmost one class in a day for all the sections.
+    \textbf{Explanation:} 
+
+    Ensure that each subject has atmost one class in a day for all the sections.
 
     \item Atmost one practical per section per day:
     \[
-    \sum_{s \in \mathcal{S}_\text{sci}} \sum_{t \in \mathcal{T}} p_{s,d,t} \leq 1 \quad \forall c \in C, \forall d \in D
+    \sum_{s \in S_\text{sci}} \sum_{t \in T} p_{s,c,d,t} \leq 1 \quad \forall c \in C, \forall d \in D
     \]
-    \textbf{Explanation:} Ensures that we have atmost one practical session in a day.
+    \textbf{Explanation:} 
 
-    % \item Prefer practicals after lunch (soft):
-    % \[
-    % \sum_{s \in \mathcal{S}_\text{sci}} \sum_{c \in \mathcal{C}} \sum_{d \in \mathcal{D}} \sum_{t \in \mathcal{T}_\text{morning}} x_{s,c,d,t}^{\text{practical}} \quad \text{minimize}
-    % \]
+    Ensures that each section has atmost one practical session in a day.
     
-    \item Practical session should take place in one of the scheduled class
+    \item Practical Sessions Must Be Scheduled During Regular Classes
     \[
-        p_{s,d,t} \leq x_{s,c,d,t} \quad \forall s \in S, c \in C, d \in D, t \in T
+        p_{s,c,d,t} \leq x_{s,c,d,t} \quad \forall s \in S, c \in C, d \in D, t \in T
     \]
-    \textbf{Explanation:} Ensures practical session for a subject is scheduled in one of the timeslots where that subject is already scheduled.  
+    \textbf{Explanation:} 
 
-    \item Atmost one subject in a timeslot for a section
+    Ensures that practical session of a subject is scheduled in one of the regular classes for each section. 
+
+    \item No overlapping subjects
     \[
         \sum_{s \in S} x_{s,c,d,t} \leq 1 \quad \forall c \in C, d \in D, t \in T
     \]
-    \textbf{Explanation:} Ensures that no overlap of subjects occurs for a timeslot for any Section.
+    \textbf{Explanation:} 
 
-    \item Sections don't have same subject class simultaneously unless practical
+    Ensures that each section can have atmost one subject in any timeslot.
+
+    \item Laboratory Capacity Constraints
     \[
-        \sum_{c \in C} x_{s,c,d,t} \geq 4 \times p_{s,d,t} \quad \forall s \in S, d \in D, t \in T
+        \sum_{c \in C} p_{s,c,d,t} \leq 1  \quad \forall s \in S_{\text{sci}}, d \in D, t \in T
     \]
-    \[
-        \sum_{c \in C} x_{s,c,d,t} \leq 1 + M \times p_{s,d,t} \quad \forall s \in S, d \in D, t \in T
-    \]
+
     \textbf{Explanation:}
-    \begin{itemize}
-        \item The first constraint ensures that if a practical for a subject is scheduled at a particular timeslot, it is scheduled for all the sections.
-        \item The second constraint ensures that if no practical for a subject is scheduled, atmost one of the sections can have a class of that subject.
-    \end{itemize}
 
-    \item Consecutive science / non-science penalty
+    Since there's only one practical laboratory per science subject, no more than one section can have a practical for the same subject at the same time.
+
+    \item No consecutive practical classes
+    \[
+    \sum_{s \in S_{\text{sci}}} (p_{s,c,d,t} + p_{s,c,d,t+1}) \leq 1 \quad \forall c \in C, d \in D, t \in \{1,2,\cdots,7\}
+    \]
+
+    \textbf{Explanation:}
+
+    Ensures that no section has consecutive practical sessions.
+
+    \item Track consecutive science and non-science classes
     \begin{align*}
         y^{\mathrm{sci}}_{c,d,t} &\;=\; \sum_{s\in S_{\mathrm{sci}}} x_{s,c,d,t} \quad \forall c \in C, t \in T, d \in D\\
         y^{\mathrm{nonsci}}_{c,d,t} &\;=\; \sum_{s\in S_{\mathrm{nonsci}}} x_{s,c,d,t} \quad \forall c \in C, t \in T, d \in D\\
         z^{\mathrm{sci}}_{c,d,t} &\ge y^{\mathrm{sci}}_{c,d,t}+y^{\mathrm{sci}}_{c,d,t+1}-1 \quad \forall c \in C, t \in T, d \in D\\
         z^{\mathrm{nonsci}}_{c,d,t} &\ge y^{\mathrm{nonsci}}_{c,d,t}+y^{\mathrm{nonsci}}_{c,d,t+1}-1 \quad \forall c \in C, t \in T, d \in D
-      \end{align*}
+    \end{align*}
       \textbf{Explanation:}
       \begin{itemize}
-        \item The first two constraints ensures that \(y^{\mathrm{sci}}_{c,d,t}\) (or \(y^{\mathrm{nonsci}}_{c,d,t}\)) is 1 if a science (or non-science) is scheduled for section \(c\) on day \(d\) for timeslot \(t\) and 0 otherwise.
-        \item The last two constraints ensures that \(z^{\mathrm{sci}}_{c,d,t}\) (or \(z^{\mathrm{nonsci}}_{c,d,t}\)) is 1 if two consecutive science (or non-science) classes are scheduled for section \(c\) on day \(d\) for timeslots \(t\) and \(t+1\). Otherwise,  \(z^{\mathrm{sci}}_{c,d,t}\) (or \(z^{\mathrm{nonsci}}_{c,d,t}\)) is 0.
+        \item The first two constraints ensures that \(y^{\mathrm{sci}}_{c,d,t}\) (or \(y^{\mathrm{nonsci}}_{c,d,t}\)) is 1 if a science (or non-science) is scheduled for section \(c\) on day \(d\) for timeslot \(t\) and 0 otherwise.\\\\
+        \(y^{\mathrm{sci}}_{c,d,t}\) and \(y^{\mathrm{nonsci}}_{c,d,t}\) basically track which type of subject is scheduled.
+
+        \item The last two constraints ensures that \(z^{\mathrm{sci}}_{c,d,t}\) (or \(z^{\mathrm{nonsci}}_{c,d,t}\)) is 1 if two consecutive science (or non-science) classes are scheduled for section \(c\) on day \(d\) for timeslots \(t\) and \(t+1\). Otherwise,  \(z^{\mathrm{sci}}_{c,d,t}\) (or \(z^{\mathrm{nonsci}}_{c,d,t}\)) is 0.\\\\
+        \(z^{\mathrm{sci}}_{c,d,t}\) and \(z^{\mathrm{nonsci}}_{c,d,t}\) basically identify when two consecutive periods have the same type of subjects for a section.
       \end{itemize}
 
-      \item Timeslot diversity penalty
+      \item Tracking timeslot usage
       \begin{align*}
         n_{s,t} &\;=\; \sum_{c\in C}\sum_{d\in D} x_{s,c,d,t}\\
         u_s &\;\geq\; n_{s,t} \quad \forall s \in S, t \in T
@@ -142,16 +154,18 @@ where \(\alpha_1,\alpha_2 \text{ and } \alpha_3\) are positive weights reflectin
       \textbf{Explanation:}
       \begin{itemize}
         \item The first constraint ensures that \(n_{s,t}\) is equal to the number of times subject \(s\) is scheduled for timeslot \(t\) in the week.
-        \item The second constraint ensures that \(u_s\) is equal to \(\max\limits_{t \in T}n_{s,t}\).
+        \item The second constraint ensures that \(u_s\) is equal to \(\max\limits_{t \in T}n_{s,t}\) i.e. the maximum number of times subject \(s\) is scheduled in a single timeslot.
       \end{itemize}
       
 \end{enumerate}
 \section*{Necessary Assumptions}
 \begin{itemize}
-    \item Every subject requires exactly 4 sessions per week, with science subjects including exactly one practical.
-    \item Lunch break perfectly divides the day into morning and afternoon blocks.
+    \item Each subject requires exactly 4 sessions per week.
+    \item Science subjects require exactly 1 practical session out of their 4 weekly sessions.
+    \item Lunch break occurs between timeslots 4 and 5.
     \item All sections have identical timetabling requirements and must satisfy the same constraints.
-    \item Soft penalties (consecutive runs, timeslot diversity) are weighted and balanced via \(\alpha_i\)'s chosen by the planner.
+    \item All constraints are equally applicable across all sections.
+    \item The weights in the objective function \((\alpha_1,\alpha_2,\alpha_3)\) can be adjusted to prioritize different aspects of the schedule.
 \end{itemize}
 
 \end{document}

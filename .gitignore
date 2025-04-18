@@ -1,0 +1,17 @@
+# Ignore Python bytecode
+__pycache__/
+*.pyc
+
+*.aux
+*.synctex.gz
+
+# Ignore all log files
+*.log
+
+# Ignore environment folders
+env/
+venv/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
